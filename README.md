@@ -18,3 +18,7 @@ Generate simulated data
 library(epidp)
 ## basic example code
 ```
+
+## Contributing guidelines
+We welcome contributions from collaborators. Before doing so, we ask that you read
+our [contributing guidelines](contributing-guidelines.md) section.
