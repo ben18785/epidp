@@ -1,8 +1,9 @@
 Package: epidp
 Title: Estimating Epidemiological Parameters Of Interest Using Covariate Information
 Version: 0.0.0.9000
-Authors@R: 
-    person("Ben", "Lambert", , "ben.c.lambert@gmail.com", role = c("aut", "cre"))
+Authors@R: c(
+    person("Ben", "Lambert", , "ben.c.lambert@gmail.com", role = c("aut", "cre")),
+    person("Kris", "Parag", , "k.parag@imperial.ac.uk", role = c("aut")))
 Description: This package uses Stan to estimate epidemiological quantities of interest.
 License: MIT + file LICENSE
 Encoding: UTF-8
@@ -25,3 +26,8 @@ LinkingTo:
     rstan (>= 2.18.1),
     StanHeaders (>= 2.18.0)
 SystemRequirements: GNU make
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+URL: https://ben18785.github.io/epidp/

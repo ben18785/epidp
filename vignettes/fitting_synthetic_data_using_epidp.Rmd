@@ -1,0 +1,32 @@
+---
+title: "Fitting synthetic data using epidp"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{fitting_synthetic_data_using_epidp}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(epidp)
+```
+
+
+In this vignette, we show how `epidp` can be used to generate then fit to synthetically
+generated infection data. Throughout, we assume a generating process of the form:
+
+\begin{equation}
+I_t \sim \text{Poisson}(R_t \Lambda_t),
+\end{equation}
+
+where $\Lambda:=\sum_{s=1}^t \omega_s I_{t-s}$.
+
+## Step function in $R_t$
+We first generate case data assuming a step function in $R_t$.
