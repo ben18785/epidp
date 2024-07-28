@@ -1,0 +1,9 @@
+pandoc: 3.1.11
+pkgdown: 2.1.0
+pkgdown_sha: ~
+articles:
+  fitting_synthetic_data_using_epidp: fitting_synthetic_data_using_epidp.html
+last_built: 2024-07-28T16:34Z
+urls:
+  reference: https://ben18785.github.io/epidp/reference
+  article: https://ben18785.github.io/epidp/articles
