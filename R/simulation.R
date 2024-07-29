@@ -23,17 +23,26 @@
 #' }
 generate_vector_serial <- function(nt, mean_si, sd_si) {
 
-  t = 1:nt
+  if (!is.numeric(nt) || nt <= 0 || nt != as.integer(nt)) {
+    stop("Parameter 'nt' should be a positive integer.")
+  }
+  if (!is.numeric(mean_si) || mean_si <= 0) {
+    stop("Parameter 'mean_si' should be a positive numeric value.")
+  }
+  if (!is.numeric(sd_si) || sd_si <= 0) {
+    stop("Parameter 'sd_si' should be a positive numeric value.")
+  }
 
   # Shape-scale parameters of gamma serial interval
-  pms = c(0,0); pms[1] = mean_si^2/sd_si^2; pms[2] = sd_si^2/mean_si
+  shape <- mean_si^2 / sd_si^2
+  scale <- sd_si^2 / mean_si
 
-  # Discretise serial interval distribution
-  tdist = c(0, t); w_dist = rep(0, nt)
-  for (i in 1:nt){
-    w_dist[i] = pgamma(tdist[i+1], shape = pms[1], scale = pms[2]) -
-      pgamma(tdist[i], shape = pms[1], scale = pms[2])
-  }
+  # Time points and cumulative distribution values
+  tdist <- 0:nt
+  cdf_vals <- pgamma(tdist, shape = shape, scale = scale)
+
+  # Compute differences to get the discretized distribution
+  w_dist <- diff(cdf_vals)
 
   w_dist
 }
@@ -74,6 +83,23 @@ generate_vector_serial <- function(nt, mean_si, sd_si) {
 #' }
 simulate_renewal_epidemic <- function(Rt_fun, nt, mean_si, sd_si, i_0){
 
+  # Input validation
+  if (!is.numeric(nt) || nt <= 0 || nt != as.integer(nt)) {
+    stop("Parameter 'nt' should be a positive integer.")
+  }
+  if (!is.numeric(mean_si) || mean_si <= 0) {
+    stop("Parameter 'mean_si' should be a positive numeric value.")
+  }
+  if (!is.numeric(sd_si) || sd_si <= 0) {
+    stop("Parameter 'sd_si' should be a positive numeric value.")
+  }
+  if (!is.numeric(i_0) || i_0 <= 0 || i_0 != as.integer(i_0)) {
+    stop("Parameter 'i_0' should be a positive integer.")
+  }
+  if (!is.function(Rt_fun)) {
+    stop("Parameter 'Rt_fun' should be a function.")
+  }
+
   # Time series and Rt
   t = 1:nt
   Rt <- vector(length = nt)
@@ -89,9 +115,9 @@ simulate_renewal_epidemic <- function(Rt_fun, nt, mean_si, sd_si, i_0){
   # Simulate from standard renewal model
   for(i in 2:nt){
     # Total infectiousness is a convolution
-    Lt[i] = sum(It[seq(i-1, 1, -1)]*w_dist[1:(i-1)])
+    Lt[i] = sum(It[seq(i-1, 1, -1)] * w_dist[1:(i-1)])
     # Poisson renewal model
-    It[i] = rpois(1, Lt[i]*Rt[i])
+    It[i] = rpois(1, Lt[i] * Rt[i])
   }
 
   data.frame(t=t, i_t=It, R_t=Rt, lambda_t=Lt, w_dist=w_dist)
