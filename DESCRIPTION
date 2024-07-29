@@ -8,7 +8,7 @@ Description: This package uses Stan to estimate epidemiological quantities of in
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.3.2
 Biarch: true
 Depends: 
     R (>= 3.4.0)
