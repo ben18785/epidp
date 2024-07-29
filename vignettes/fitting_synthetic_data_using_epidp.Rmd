@@ -135,7 +135,8 @@ We now use a Stan version of EpiFilter to estimate the $R_t$ profile.
 fit <- fit_epifilter(
   N=length(epidemic_df$i_t),
   C=epidemic_df$i_t,
-  w=epidemic_df$w_dist
+  w=epidemic_df$w_dist,
+  iter=200
 )
 
 # look at MCMC summaries

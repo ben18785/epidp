@@ -59,6 +59,7 @@ generate_vector_serial <- function(nt, mean_si, sd_si) {
 #' @param mean_si A numeric value representing the mean of the serial interval distribution.
 #' @param sd_si A numeric value representing the standard deviation of the serial interval distribution.
 #' @param i_0 An integer specifying the initial number of cases at time point 1.
+#' @param X An optional matrix of covariates with `nt` rows.
 #'
 #' @return A list containing the following components:
 #' \describe{
@@ -81,7 +82,7 @@ generate_vector_serial <- function(nt, mean_si, sd_si) {
 #' rt_fun <- function(t) { 1.5 * exp(-0.05 * t) }
 #' simulate_renewal_epidemic(rt_fun, 100, 5, 2, 10)
 #' }
-simulate_renewal_epidemic <- function(Rt_fun, nt, mean_si, sd_si, i_0){
+simulate_renewal_epidemic <- function(Rt_fun, nt, mean_si, sd_si, i_0, X=NULL){
 
   # Input validation
   if (!is.numeric(nt) || nt <= 0 || nt != as.integer(nt)) {
@@ -99,12 +100,18 @@ simulate_renewal_epidemic <- function(Rt_fun, nt, mean_si, sd_si, i_0){
   if (!is.function(Rt_fun)) {
     stop("Parameter 'Rt_fun' should be a function.")
   }
+  if (!is.null(X) && (!is.matrix(X) || nrow(X) != nt)) {
+    stop("Parameter 'X' should be a matrix with 'nt' rows.")
+  }
 
   # Time series and Rt
   t = 1:nt
   Rt <- vector(length = nt)
   for(i in seq_along(Rt)) {
-    Rt[i] = rt_fun(t[i])
+    if(is.null(X))
+      Rt[i] = rt_fun(t[i])
+    else
+      Rt[i] <- rt_fun(t[i], X[i, ])
   }
 
   # Total infectiousness and incidence with initial imports
