@@ -28,9 +28,14 @@ LinkingTo:
     StanHeaders (>= 2.18.0)
 SystemRequirements: GNU make
 Suggests: 
+    dplyr,
+    ggplot2,
     knitr,
+    magrittr,
+    purrr,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    tidyr
 VignetteBuilder: knitr
 URL: https://ben18785.github.io/epidp/
 Config/testthat/edition: 3
