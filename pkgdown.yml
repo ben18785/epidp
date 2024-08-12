@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   articles/fitting_synthetic_data_including_covariates: fitting_synthetic_data_including_covariates.html
   fitting_synthetic_data_using_epidp: fitting_synthetic_data_using_epidp.html
-last_built: 2024-08-12T16:20Z
+last_built: 2024-08-12T16:38Z
 urls:
   reference: https://ben18785.github.io/epidp/reference
   article: https://ben18785.github.io/epidp/articles
