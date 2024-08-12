@@ -1,20 +1,29 @@
+---
+output: github_document
+---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
 
 # epidp
 
 <!-- badges: start -->
-
 [![codecov](https://codecov.io/github/ben18785/epidp/graph/badge.svg?token=STG0INT235)](https://codecov.io/github/ben18785/epidp)
 <!-- badges: end -->
 
-The goal of `epidp` is to allow covariate information to inform
-estimates of the time-varying reproduction number, $R_t$.
+The goal of `epidp` is to allow covariate information to inform estimates of the time-varying reproduction number, $R_t$.
 
 ## Installation
 
-You can install the development version of epidp from
-[GitHub](https://github.com/) with:
+You can install the development version of epidp from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
@@ -22,36 +31,15 @@ devtools::install_github("ben18785/epidp")
 ```
 
 ## Example
-
 ### Step function in $R_t$
-
 We first generate case data assuming a step function for $R_t$.
-
-``` r
+```{r}
 library(epidp)
 library(ggplot2)
 library(dplyr)
-#> 
-#> Attaching package: 'dplyr'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     filter, lag
-#> The following objects are masked from 'package:base':
-#> 
-#>     intersect, setdiff, setequal, union
 library(magrittr)
 library(purrr)
-#> 
-#> Attaching package: 'purrr'
-#> The following object is masked from 'package:magrittr':
-#> 
-#>     set_names
 library(tidyr)
-#> 
-#> Attaching package: 'tidyr'
-#> The following object is masked from 'package:magrittr':
-#> 
-#>     extract
 
 rt_fun = function(t){
   if(t <= 60)
@@ -89,16 +77,12 @@ epidemic_df %>%
   scale_color_brewer("Series", palette = "Dark2")
 ```
 
-<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
-
-We now use a Stan version of EpiFilter to estimate the maximum a
-posteriori estimates of $R_t$ and overlay these on top of the actual
-values. Note, these estimates do not have uncertainty associated with
-them but the benefit of this is that estimation is instantaneous. The
-estimates are close to the actual $R_t$ values after an initial period
-when case counts are low.
-
-``` r
+We now use a Stan version of EpiFilter to estimate the maximum a posteriori estimates
+of $R_t$ and overlay these on top of the actual values. Note, these estimates do
+not have uncertainty associated with them but the benefit of this is that estimation
+is instantaneous. The estimates are close to the actual $R_t$ values after an initial
+period when case counts are low.
+```{r}
 # fit model
 fit <- fit_epifilter(
   N=length(epidemic_df$i_t),
@@ -123,10 +107,6 @@ epidemic_df %>%
   theme_minimal()
 ```
 
-<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
-
 ## Contributing guidelines
-
-We welcome contributions from collaborators. Before doing so, we ask
-that you read our [contributing guidelines](contributing-guidelines.md)
-section.
+We welcome contributions from collaborators. Before doing so, we ask that you read
+our [contributing guidelines](contributing-guidelines.md) section.

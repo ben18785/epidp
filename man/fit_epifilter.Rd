@@ -2,20 +2,25 @@
 % Please edit documentation in R/fit_models.R
 \name{fit_epifilter}
 \alias{fit_epifilter}
-\title{Bayesian linear regression with Stan}
+\title{Estimate the time-varying reproduction number from incidence data}
 \usage{
-fit_epifilter(N, C, wmax, w, ...)
+fit_epifilter(N, C, w, is_sampling = TRUE, ...)
 }
 \arguments{
-\item{...}{Arguments passed to \code{rstan::sampling} (e.g. iter, chains).}
+\item{N}{number of data points}
 
-\item{x}{Numeric vector of input values.}
+\item{C}{case counts}
 
-\item{y}{Numeric vector of output values.}
+\item{w}{discretised serial interval}
+
+\item{is_sampling}{Boolean indicating if sampling is to be used (if TRUE) or
+optimisation (if FALSE). Defaults to TRUE}
+
+\item{...}{}
 }
 \value{
-An object of class \code{stanfit} returned by \code{rstan::sampling}
+a stanfit object
 }
 \description{
-Bayesian linear regression with Stan
+Estimate the time-varying reproduction number from incidence data
 }

@@ -37,7 +37,7 @@ rho <- 0.8
 for(i in 2:length(g)) {
   g[i] <- rho * g[i - 1] + rnorm(1, 0, 0.1)
 }
-X <- matrix(c(f, g), nrow = length(x), ncol = 2)
+X <- matrix(c(f, g), nrow = length(f), ncol = 2)
 
 # simulation parameters
 mean_si <- 6.5
@@ -76,8 +76,7 @@ fit <- fit_epifilter(
 print(fit, c("sigma", "R"))
 ```
 
-We now overlay the estimated $R_t$ versus the actual values. The estimated $R_t$ values
-coincide reasonably with the true values.
+We now overlay the estimated $R_t$ versus the actual values. The estimated $R_t$ values coincide reasonably with the true values.
 ```{r}
 # extract posterior quantiles
 R_draws <- rstan::extract(fit, "R")[[1]]

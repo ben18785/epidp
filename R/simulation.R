@@ -82,6 +82,7 @@ generate_vector_serial <- function(nt, mean_si, sd_si) {
 #' rt_fun <- function(t) { 1.5 * exp(-0.05 * t) }
 #' simulate_renewal_epidemic(rt_fun, 100, 5, 2, 10)
 #' }
+#' @export
 simulate_renewal_epidemic <- function(Rt_fun, nt, mean_si, sd_si, i_0, X=NULL){
 
   # Input validation
@@ -109,9 +110,9 @@ simulate_renewal_epidemic <- function(Rt_fun, nt, mean_si, sd_si, i_0, X=NULL){
   Rt <- vector(length = nt)
   for(i in seq_along(Rt)) {
     if(is.null(X))
-      Rt[i] = rt_fun(t[i])
+      Rt[i] = Rt_fun(t[i])
     else
-      Rt[i] <- rt_fun(t[i], X[i, ])
+      Rt[i] <- Rt_fun(t[i], X[i, ])
   }
 
   # Total infectiousness and incidence with initial imports
