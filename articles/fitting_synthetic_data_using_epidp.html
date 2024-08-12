@@ -33,7 +33,8 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/fitting_synthetic_data_using_epidp.html">Fitting synthetic data using epidp</a></li>
+<li><a class="dropdown-item" href="../articles/fitting_synthetic_data_including_covariates.html">Fitting synthetic data including covariates</a></li>
+    <li><a class="dropdown-item" href="../articles/fitting_synthetic_data_using_epidp.html">Fitting synthetic data using epidp</a></li>
   </ul>
 </li>
       </ul>
@@ -64,7 +65,31 @@
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ben18785.github.io/epidp/">epidp</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ben18785.github.io/epidp/">epidp</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attaching package: 'dplyr'</span></span>
+<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     filter, lag</span></span>
+<span><span class="co">#&gt; The following objects are masked from 'package:base':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/" class="external-link">purrr</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attaching package: 'purrr'</span></span>
+<span><span class="co">#&gt; The following object is masked from 'package:magrittr':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     set_names</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attaching package: 'tidyr'</span></span>
+<span><span class="co">#&gt; The following object is masked from 'package:magrittr':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     extract</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>mc.cores<span class="op">=</span><span class="fl">4</span><span class="op">)</span></span></code></pre></div>
 <p>In this vignette, we show how <code>epidp</code> can be used to
 generate then fit to synthetically generated infection data. Throughout,
 we assume a generating process of the form:</p>
@@ -77,10 +102,366 @@ I_t \sim \text{Poisson}(R_t \Lambda_t),
 <h2 id="step-function-in-r_t">Step function in
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>R</mi><mi>t</mi></msub><annotation encoding="application/x-tex">R_t</annotation></semantics></math><a class="anchor" aria-label="anchor" href="#step-function-in-r_t"></a>
 </h2>
-<p>We first generate case data assuming a step function in
+<p>We first generate case data assuming a step function for
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>R</mi><mi>t</mi></msub><annotation encoding="application/x-tex">R_t</annotation></semantics></math>.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rt_fun</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">t</span><span class="op">)</span><span class="op">{</span></span>
+<span>  <span class="kw">if</span><span class="op">(</span><span class="va">t</span> <span class="op">&lt;=</span> <span class="fl">60</span><span class="op">)</span></span>
+<span>    <span class="va">R</span> <span class="op">=</span> <span class="fl">2</span></span>
+<span>  <span class="kw">else</span> <span class="kw">if</span> <span class="op">(</span><span class="va">t</span> <span class="op">&lt;=</span> <span class="fl">90</span><span class="op">)</span></span>
+<span>    <span class="va">R</span> <span class="op">=</span> <span class="fl">0.5</span></span>
+<span>  <span class="kw">else</span></span>
+<span>    <span class="va">R</span> <span class="op">=</span> <span class="fl">1</span></span>
+<span>  <span class="va">R</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># simulation parameters</span></span>
+<span><span class="va">nt</span> <span class="op">&lt;-</span> <span class="fl">200</span></span>
+<span><span class="va">mean_si</span> <span class="op">&lt;-</span> <span class="fl">6.5</span></span>
+<span><span class="va">sd_si</span> <span class="op">&lt;-</span> <span class="fl">4.03</span></span>
+<span><span class="va">i_0</span> <span class="op">&lt;-</span> <span class="fl">10</span></span>
+<span></span>
+<span><span class="co"># data frame of outputs</span></span>
+<span><span class="va">epidemic_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_renewal_epidemic.html">simulate_renewal_epidemic</a></span><span class="op">(</span><span class="va">rt_fun</span>, <span class="va">nt</span>, <span class="va">mean_si</span>, <span class="va">sd_si</span>, <span class="va">i_0</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># plot</span></span>
+<span><span class="va">epidemic_df</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">w_dist</span>, <span class="va">lambda_t</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">i_t</span>, <span class="va">R_t</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="va">value</span>, colour <span class="op">=</span> <span class="va">name</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span></span>
+<span>    name <span class="op">=</span> <span class="st">"Incidence (i_t)"</span>,</span>
+<span>    sec.axis <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/sec_axis.html" class="external-link">sec_axis</a></span><span class="op">(</span><span class="op">~</span> <span class="va">.</span> <span class="op">/</span> <span class="fl">1000</span>, name <span class="op">=</span> <span class="st">"Reproduction Number (R_t)"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Time"</span>, colour <span class="op">=</span> <span class="st">"Variable"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="fitting_synthetic_data_using_epidp_files/figure-html/unnamed-chunk-2-1.png" width="700"></p>
+<p>We now use a Stan version of EpiFilter to estimate the maximum a
+posteriori estimates of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>R</mi><mi>t</mi></msub><annotation encoding="application/x-tex">R_t</annotation></semantics></math>
+and overlay these on top of the actual values. Note, these estimates do
+not have uncertainty associated with them but the benefit of this is
+that estimation is instantaneous. The estimates are close to the actual
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>R</mi><mi>t</mi></msub><annotation encoding="application/x-tex">R_t</annotation></semantics></math>
+values after an initial period when case counts are low.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># fit model</span></span>
+<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit_epifilter.html">fit_epifilter</a></span><span class="op">(</span></span>
+<span>  N<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">epidemic_df</span><span class="op">$</span><span class="va">i_t</span><span class="op">)</span>,</span>
+<span>  C<span class="op">=</span><span class="va">epidemic_df</span><span class="op">$</span><span class="va">i_t</span>,</span>
+<span>  w<span class="op">=</span><span class="va">epidemic_df</span><span class="op">$</span><span class="va">w_dist</span>,</span>
+<span>  is_sampling<span class="op">=</span><span class="cn">FALSE</span>,</span>
+<span>  as_vector<span class="op">=</span><span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># plot</span></span>
+<span><span class="va">R</span> <span class="op">&lt;-</span> <span class="va">fit</span><span class="op">$</span><span class="va">par</span><span class="op">$</span><span class="va">R</span></span>
+<span><span class="va">epidemic_df</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>estimated<span class="op">=</span><span class="va">R</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>true<span class="op">=</span><span class="va">R_t</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">t</span>, <span class="va">estimated</span>, <span class="va">true</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">estimated</span>, <span class="va">true</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">t</span>, y<span class="op">=</span><span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>colour<span class="op">=</span><span class="va">name</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_brewer.html" class="external-link">scale_color_brewer</a></span><span class="op">(</span><span class="st">"R_t"</span>, palette <span class="op">=</span> <span class="st">"Dark2"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">"R_t"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="fitting_synthetic_data_using_epidp_files/figure-html/unnamed-chunk-3-1.png" width="700"></p>
 </div>
-  </main>
+<div class="section level2">
+<h2 id="sinusoidal-function-in-r_t">Sinusoidal function in
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>R</mi><mi>t</mi></msub><annotation encoding="application/x-tex">R_t</annotation></semantics></math><a class="anchor" aria-label="anchor" href="#sinusoidal-function-in-r_t"></a>
+</h2>
+<p>We now generate case data assuming a sinusoidal
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>R</mi><mi>t</mi></msub><annotation encoding="application/x-tex">R_t</annotation></semantics></math>.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># define sinusoidal Rt</span></span>
+<span><span class="va">rt_fun</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">t</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fl">1.3</span> <span class="op">+</span> <span class="fl">1.2</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">4</span> <span class="op">*</span> <span class="op">(</span><span class="va">pi</span> <span class="op">/</span> <span class="fl">180</span><span class="op">)</span> <span class="op">*</span> <span class="va">t</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">nt</span> <span class="op">&lt;-</span> <span class="fl">200</span></span>
+<span><span class="va">mean_si</span> <span class="op">&lt;-</span> <span class="fl">6.5</span></span>
+<span><span class="va">sd_si</span> <span class="op">&lt;-</span> <span class="fl">4.03</span></span>
+<span><span class="va">i_0</span> <span class="op">&lt;-</span> <span class="fl">10</span></span>
+<span></span>
+<span><span class="co"># data frame of outputs</span></span>
+<span><span class="va">epidemic_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_renewal_epidemic.html">simulate_renewal_epidemic</a></span><span class="op">(</span><span class="va">rt_fun</span>, <span class="va">nt</span>, <span class="va">mean_si</span>, <span class="va">sd_si</span>, <span class="va">i_0</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># plot</span></span>
+<span><span class="va">epidemic_df</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">w_dist</span>, <span class="va">lambda_t</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">i_t</span>, <span class="va">R_t</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">t</span>, y <span class="op">=</span> <span class="va">value</span>, colour <span class="op">=</span> <span class="va">name</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span></span>
+<span>    name <span class="op">=</span> <span class="st">"Incidence (i_t)"</span>,</span>
+<span>    sec.axis <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/sec_axis.html" class="external-link">sec_axis</a></span><span class="op">(</span><span class="op">~</span> <span class="va">.</span> <span class="op">/</span> <span class="fl">1000</span>, name <span class="op">=</span> <span class="st">"Reproduction Number (R_t)"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Time"</span>, colour <span class="op">=</span> <span class="st">"Variable"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="fitting_synthetic_data_using_epidp_files/figure-html/unnamed-chunk-4-1.png" width="700"></p>
+<p>We now use a Stan version of EpiFilter to estimate the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>R</mi><mi>t</mi></msub><annotation encoding="application/x-tex">R_t</annotation></semantics></math>
+profile.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># fit model</span></span>
+<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit_epifilter.html">fit_epifilter</a></span><span class="op">(</span></span>
+<span>  N<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">epidemic_df</span><span class="op">$</span><span class="va">i_t</span><span class="op">)</span>,</span>
+<span>  C<span class="op">=</span><span class="va">epidemic_df</span><span class="op">$</span><span class="va">i_t</span>,</span>
+<span>  w<span class="op">=</span><span class="va">epidemic_df</span><span class="op">$</span><span class="va">w_dist</span>,</span>
+<span>  iter<span class="op">=</span><span class="fl">200</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: The largest R-hat is NA, indicating chains have not mixed.</span></span>
+<span><span class="co">#&gt; Running the chains for more iterations may help. See</span></span>
+<span><span class="co">#&gt; https://mc-stan.org/misc/warnings.html#r-hat</span></span>
+<span><span class="co">#&gt; Warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.</span></span>
+<span><span class="co">#&gt; Running the chains for more iterations may help. See</span></span>
+<span><span class="co">#&gt; https://mc-stan.org/misc/warnings.html#bulk-ess</span></span>
+<span><span class="co">#&gt; Warning: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.</span></span>
+<span><span class="co">#&gt; Running the chains for more iterations may help. See</span></span>
+<span><span class="co">#&gt; https://mc-stan.org/misc/warnings.html#tail-ess</span></span>
+<span></span>
+<span><span class="co"># look at MCMC summaries</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fit</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sigma"</span>, <span class="st">"R"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Inference for Stan model: epifilter.</span></span>
+<span><span class="co">#&gt; 4 chains, each with iter=200; warmup=100; thin=1; </span></span>
+<span><span class="co">#&gt; post-warmup draws per chain=100, total post-warmup draws=400.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;        mean se_mean   sd 2.5%  25%  50%  75% 97.5% n_eff Rhat</span></span>
+<span><span class="co">#&gt; sigma  0.14    0.00 0.01 0.12 0.13 0.14 0.14  0.17   107 1.03</span></span>
+<span><span class="co">#&gt; R[1]   1.41    0.05 0.45 0.62 1.11 1.40 1.67  2.35    75 1.06</span></span>
+<span><span class="co">#&gt; R[2]   1.42    0.05 0.41 0.64 1.17 1.43 1.66  2.28    68 1.07</span></span>
+<span><span class="co">#&gt; R[3]   1.43    0.05 0.39 0.76 1.16 1.43 1.64  2.28    64 1.07</span></span>
+<span><span class="co">#&gt; R[4]   1.43    0.04 0.37 0.78 1.17 1.41 1.66  2.19    82 1.06</span></span>
+<span><span class="co">#&gt; R[5]   1.44    0.04 0.35 0.85 1.19 1.42 1.67  2.17   101 1.06</span></span>
+<span><span class="co">#&gt; R[6]   1.50    0.04 0.33 0.90 1.26 1.46 1.72  2.18    69 1.07</span></span>
+<span><span class="co">#&gt; R[7]   1.57    0.04 0.32 0.99 1.35 1.54 1.77  2.24    77 1.06</span></span>
+<span><span class="co">#&gt; R[8]   1.62    0.03 0.33 1.03 1.42 1.58 1.81  2.32   106 1.05</span></span>
+<span><span class="co">#&gt; R[9]   1.68    0.02 0.34 1.09 1.46 1.64 1.87  2.39   182 1.03</span></span>
+<span><span class="co">#&gt; R[10]  1.76    0.03 0.33 1.20 1.54 1.74 1.96  2.48   168 1.03</span></span>
+<span><span class="co">#&gt; R[11]  1.82    0.02 0.33 1.25 1.57 1.78 2.03  2.54   180 1.03</span></span>
+<span><span class="co">#&gt; R[12]  1.84    0.02 0.31 1.31 1.63 1.81 2.07  2.46   258 1.02</span></span>
+<span><span class="co">#&gt; R[13]  1.89    0.02 0.30 1.39 1.68 1.86 2.09  2.50   288 1.02</span></span>
+<span><span class="co">#&gt; R[14]  1.97    0.02 0.32 1.43 1.74 1.94 2.19  2.61   351 1.01</span></span>
+<span><span class="co">#&gt; R[15]  2.04    0.01 0.32 1.46 1.81 2.03 2.25  2.65   488 1.00</span></span>
+<span><span class="co">#&gt; R[16]  2.08    0.02 0.32 1.48 1.87 2.06 2.29  2.75   451 1.00</span></span>
+<span><span class="co">#&gt; R[17]  2.14    0.01 0.30 1.59 1.92 2.12 2.35  2.73   420 0.99</span></span>
+<span><span class="co">#&gt; R[18]  2.22    0.01 0.28 1.70 2.02 2.21 2.40  2.76   457 0.99</span></span>
+<span><span class="co">#&gt; R[19]  2.29    0.01 0.27 1.79 2.10 2.29 2.49  2.81   490 1.00</span></span>
+<span><span class="co">#&gt; R[20]  2.40    0.01 0.27 1.88 2.23 2.40 2.55  3.02   551 1.00</span></span>
+<span><span class="co">#&gt; R[21]  2.50    0.01 0.26 1.99 2.31 2.50 2.68  3.02   449 1.00</span></span>
+<span><span class="co">#&gt; R[22]  2.63    0.01 0.27 2.14 2.44 2.60 2.81  3.18   496 0.99</span></span>
+<span><span class="co">#&gt; R[23]  2.63    0.01 0.26 2.15 2.45 2.62 2.81  3.12   418 0.99</span></span>
+<span><span class="co">#&gt; R[24]  2.62    0.01 0.26 2.15 2.46 2.61 2.78  3.19   415 1.00</span></span>
+<span><span class="co">#&gt; R[25]  2.54    0.01 0.23 2.07 2.38 2.54 2.69  3.02   448 1.00</span></span>
+<span><span class="co">#&gt; R[26]  2.52    0.01 0.21 2.14 2.36 2.52 2.66  2.97   672 1.00</span></span>
+<span><span class="co">#&gt; R[27]  2.59    0.01 0.21 2.21 2.44 2.59 2.73  3.00   475 1.00</span></span>
+<span><span class="co">#&gt; R[28]  2.45    0.01 0.21 2.07 2.32 2.44 2.60  2.86   599 0.99</span></span>
+<span><span class="co">#&gt; R[29]  2.28    0.01 0.19 1.94 2.16 2.28 2.40  2.67   499 0.99</span></span>
+<span><span class="co">#&gt; R[30]  2.21    0.01 0.17 1.90 2.09 2.20 2.31  2.56   417 1.00</span></span>
+<span><span class="co">#&gt; R[31]  2.16    0.01 0.16 1.89 2.05 2.16 2.26  2.46   419 1.00</span></span>
+<span><span class="co">#&gt; R[32]  2.11    0.01 0.15 1.82 2.01 2.10 2.20  2.46   472 1.00</span></span>
+<span><span class="co">#&gt; R[33]  2.19    0.01 0.16 1.91 2.09 2.19 2.28  2.55   355 1.00</span></span>
+<span><span class="co">#&gt; R[34]  2.08    0.01 0.15 1.82 1.98 2.07 2.19  2.36   414 1.00</span></span>
+<span><span class="co">#&gt; R[35]  1.91    0.01 0.14 1.64 1.82 1.91 2.01  2.21   398 0.99</span></span>
+<span><span class="co">#&gt; R[36]  1.87    0.01 0.13 1.62 1.78 1.85 1.96  2.12   303 1.00</span></span>
+<span><span class="co">#&gt; R[37]  1.82    0.01 0.13 1.58 1.74 1.81 1.91  2.10   401 1.01</span></span>
+<span><span class="co">#&gt; R[38]  1.84    0.01 0.12 1.61 1.77 1.85 1.92  2.06   429 0.99</span></span>
+<span><span class="co">#&gt; R[39]  1.74    0.01 0.11 1.52 1.66 1.74 1.81  1.99   358 1.00</span></span>
+<span><span class="co">#&gt; R[40]  1.59    0.00 0.10 1.39 1.52 1.58 1.65  1.79   405 1.00</span></span>
+<span><span class="co">#&gt; R[41]  1.59    0.00 0.09 1.42 1.52 1.58 1.66  1.77   383 1.01</span></span>
+<span><span class="co">#&gt; R[42]  1.50    0.00 0.10 1.32 1.43 1.50 1.57  1.69   491 1.00</span></span>
+<span><span class="co">#&gt; R[43]  1.35    0.00 0.10 1.17 1.28 1.34 1.40  1.54   375 0.99</span></span>
+<span><span class="co">#&gt; R[44]  1.47    0.00 0.09 1.29 1.41 1.47 1.54  1.66   392 0.99</span></span>
+<span><span class="co">#&gt; R[45]  1.35    0.00 0.08 1.20 1.29 1.34 1.41  1.52   416 1.00</span></span>
+<span><span class="co">#&gt; R[46]  1.37    0.00 0.09 1.22 1.32 1.37 1.43  1.54   463 0.99</span></span>
+<span><span class="co">#&gt; R[47]  1.30    0.00 0.08 1.15 1.25 1.30 1.36  1.46   366 1.01</span></span>
+<span><span class="co">#&gt; R[48]  1.14    0.00 0.07 1.00 1.09 1.13 1.19  1.29   414 0.99</span></span>
+<span><span class="co">#&gt; R[49]  1.03    0.00 0.07 0.89 0.98 1.03 1.07  1.17   489 1.00</span></span>
+<span><span class="co">#&gt; R[50]  0.89    0.00 0.07 0.76 0.84 0.89 0.94  1.02   379 1.00</span></span>
+<span><span class="co">#&gt; R[51]  0.82    0.00 0.06 0.71 0.78 0.82 0.86  0.94   434 1.00</span></span>
+<span><span class="co">#&gt; R[52]  0.79    0.00 0.06 0.66 0.75 0.79 0.83  0.90   407 1.00</span></span>
+<span><span class="co">#&gt; R[53]  0.61    0.00 0.06 0.50 0.57 0.61 0.65  0.73   328 1.00</span></span>
+<span><span class="co">#&gt; R[54]  0.60    0.00 0.06 0.50 0.56 0.60 0.64  0.72   683 1.00</span></span>
+<span><span class="co">#&gt; R[55]  0.56    0.00 0.05 0.46 0.52 0.56 0.59  0.66   351 1.00</span></span>
+<span><span class="co">#&gt; R[56]  0.45    0.00 0.05 0.36 0.43 0.45 0.48  0.54   458 0.99</span></span>
+<span><span class="co">#&gt; R[57]  0.42    0.00 0.05 0.33 0.39 0.42 0.45  0.53   421 1.00</span></span>
+<span><span class="co">#&gt; R[58]  0.34    0.00 0.04 0.26 0.31 0.34 0.37  0.42   432 1.00</span></span>
+<span><span class="co">#&gt; R[59]  0.23    0.00 0.04 0.17 0.21 0.23 0.26  0.31   475 1.00</span></span>
+<span><span class="co">#&gt; R[60]  0.22    0.00 0.04 0.16 0.19 0.22 0.24  0.30   482 1.00</span></span>
+<span><span class="co">#&gt; R[61]  0.18    0.00 0.04 0.12 0.16 0.18 0.21  0.26   609 0.99</span></span>
+<span><span class="co">#&gt; R[62]  0.17    0.00 0.03 0.12 0.15 0.17 0.20  0.24   599 0.99</span></span>
+<span><span class="co">#&gt; R[63]  0.17    0.00 0.04 0.10 0.14 0.17 0.19  0.26   613 0.99</span></span>
+<span><span class="co">#&gt; R[64]  0.12    0.00 0.03 0.07 0.10 0.12 0.14  0.19   575 1.00</span></span>
+<span><span class="co">#&gt; R[65]  0.12    0.00 0.04 0.06 0.09 0.11 0.14  0.20   500 1.01</span></span>
+<span><span class="co">#&gt; R[66]  0.09    0.00 0.03 0.04 0.07 0.09 0.11  0.17   374 1.01</span></span>
+<span><span class="co">#&gt; R[67]  0.09    0.00 0.04 0.03 0.07 0.09 0.12  0.19   260 1.01</span></span>
+<span><span class="co">#&gt; R[68]  0.13    0.00 0.05 0.05 0.09 0.12 0.15  0.24   294 1.00</span></span>
+<span><span class="co">#&gt; R[69]  0.14    0.00 0.05 0.06 0.11 0.14 0.17  0.26   327 1.01</span></span>
+<span><span class="co">#&gt; R[70]  0.17    0.00 0.06 0.06 0.13 0.16 0.21  0.30   336 1.01</span></span>
+<span><span class="co">#&gt; R[71]  0.19    0.00 0.07 0.08 0.14 0.19 0.24  0.33   297 1.01</span></span>
+<span><span class="co">#&gt; R[72]  0.24    0.00 0.08 0.11 0.18 0.23 0.30  0.43   294 1.00</span></span>
+<span><span class="co">#&gt; R[73]  0.25    0.01 0.09 0.10 0.18 0.24 0.30  0.44   290 1.01</span></span>
+<span><span class="co">#&gt; R[74]  0.28    0.01 0.10 0.11 0.21 0.26 0.34  0.51   293 0.99</span></span>
+<span><span class="co">#&gt; R[75]  0.31    0.01 0.11 0.13 0.24 0.30 0.38  0.55   245 1.00</span></span>
+<span><span class="co">#&gt; R[76]  0.36    0.01 0.12 0.18 0.29 0.34 0.43  0.62   266 0.99</span></span>
+<span><span class="co">#&gt; R[77]  0.45    0.01 0.13 0.22 0.36 0.45 0.54  0.75   231 0.99</span></span>
+<span><span class="co">#&gt; R[78]  0.54    0.01 0.15 0.29 0.45 0.53 0.62  0.90   236 1.00</span></span>
+<span><span class="co">#&gt; R[79]  0.62    0.01 0.17 0.33 0.50 0.59 0.71  1.00   224 1.00</span></span>
+<span><span class="co">#&gt; R[80]  0.67    0.01 0.17 0.38 0.56 0.66 0.77  1.06   218 1.00</span></span>
+<span><span class="co">#&gt; R[81]  0.74    0.01 0.19 0.41 0.62 0.72 0.85  1.15   239 1.00</span></span>
+<span><span class="co">#&gt; R[82]  0.83    0.01 0.21 0.45 0.69 0.82 0.95  1.30   230 0.99</span></span>
+<span><span class="co">#&gt; R[83]  0.94    0.01 0.21 0.58 0.78 0.92 1.10  1.37   207 1.00</span></span>
+<span><span class="co">#&gt; R[84]  1.03    0.01 0.23 0.63 0.86 1.01 1.18  1.53   267 0.99</span></span>
+<span><span class="co">#&gt; R[85]  1.13    0.01 0.23 0.69 0.97 1.13 1.28  1.55   302 0.99</span></span>
+<span><span class="co">#&gt; R[86]  1.23    0.01 0.26 0.72 1.05 1.24 1.40  1.77   333 0.99</span></span>
+<span><span class="co">#&gt; R[87]  1.33    0.01 0.26 0.85 1.15 1.32 1.49  1.86   340 0.99</span></span>
+<span><span class="co">#&gt; R[88]  1.40    0.01 0.27 0.86 1.24 1.40 1.58  1.96   342 1.00</span></span>
+<span><span class="co">#&gt; R[89]  1.44    0.01 0.26 0.92 1.27 1.43 1.63  1.97   380 1.00</span></span>
+<span><span class="co">#&gt; R[90]  1.50    0.01 0.26 1.03 1.32 1.48 1.67  2.00   351 1.00</span></span>
+<span><span class="co">#&gt; R[91]  1.52    0.01 0.27 1.04 1.36 1.49 1.67  2.05   417 1.00</span></span>
+<span><span class="co">#&gt; R[92]  1.50    0.01 0.26 1.04 1.33 1.50 1.66  2.03   412 1.00</span></span>
+<span><span class="co">#&gt; R[93]  1.53    0.01 0.26 1.07 1.37 1.51 1.70  2.11   446 1.00</span></span>
+<span><span class="co">#&gt; R[94]  1.58    0.01 0.26 1.13 1.40 1.55 1.75  2.13   532 1.00</span></span>
+<span><span class="co">#&gt; R[95]  1.64    0.01 0.28 1.16 1.44 1.62 1.82  2.20   502 1.00</span></span>
+<span><span class="co">#&gt; R[96]  1.70    0.01 0.28 1.21 1.51 1.68 1.88  2.30   526 1.00</span></span>
+<span><span class="co">#&gt; R[97]  1.82    0.01 0.27 1.33 1.65 1.80 2.00  2.37   518 1.01</span></span>
+<span><span class="co">#&gt; R[98]  1.88    0.01 0.26 1.37 1.70 1.86 2.04  2.41   469 1.00</span></span>
+<span><span class="co">#&gt; R[99]  1.92    0.01 0.28 1.45 1.72 1.91 2.10  2.49   518 0.99</span></span>
+<span><span class="co">#&gt; R[100] 1.94    0.01 0.27 1.43 1.75 1.96 2.13  2.44   492 1.00</span></span>
+<span><span class="co">#&gt; R[101] 2.05    0.01 0.27 1.50 1.88 2.05 2.23  2.57   623 0.99</span></span>
+<span><span class="co">#&gt; R[102] 2.13    0.01 0.26 1.64 1.94 2.12 2.31  2.63   580 0.99</span></span>
+<span><span class="co">#&gt; R[103] 2.18    0.01 0.27 1.73 2.00 2.15 2.35  2.77   620 0.99</span></span>
+<span><span class="co">#&gt; R[104] 2.26    0.01 0.24 1.82 2.08 2.23 2.45  2.76   583 1.00</span></span>
+<span><span class="co">#&gt; R[105] 2.23    0.01 0.24 1.77 2.07 2.23 2.40  2.74   507 1.00</span></span>
+<span><span class="co">#&gt; R[106] 2.20    0.01 0.23 1.75 2.05 2.20 2.37  2.63   538 0.99</span></span>
+<span><span class="co">#&gt; R[107] 2.25    0.01 0.22 1.84 2.10 2.24 2.40  2.67   442 0.99</span></span>
+<span><span class="co">#&gt; R[108] 2.40    0.01 0.22 2.01 2.25 2.40 2.54  2.83   509 0.99</span></span>
+<span><span class="co">#&gt; R[109] 2.56    0.01 0.22 2.16 2.41 2.56 2.71  3.02   434 1.01</span></span>
+<span><span class="co">#&gt; R[110] 2.58    0.01 0.20 2.18 2.45 2.58 2.72  3.01   395 0.99</span></span>
+<span><span class="co">#&gt; R[111] 2.60    0.01 0.19 2.20 2.46 2.60 2.72  3.00   339 1.00</span></span>
+<span><span class="co">#&gt; R[112] 2.42    0.01 0.19 2.05 2.27 2.42 2.54  2.81   391 1.01</span></span>
+<span><span class="co">#&gt; R[113] 2.43    0.01 0.19 2.08 2.30 2.42 2.54  2.82   426 1.00</span></span>
+<span><span class="co">#&gt; R[114] 2.52    0.01 0.17 2.16 2.40 2.51 2.64  2.86   377 0.99</span></span>
+<span><span class="co">#&gt; R[115] 2.54    0.01 0.17 2.20 2.43 2.53 2.65  2.88   485 0.99</span></span>
+<span><span class="co">#&gt; R[116] 2.51    0.01 0.15 2.22 2.40 2.50 2.60  2.82   277 1.00</span></span>
+<span><span class="co">#&gt; R[117] 2.31    0.01 0.16 2.03 2.21 2.31 2.42  2.61   315 0.99</span></span>
+<span><span class="co">#&gt; R[118] 2.41    0.01 0.14 2.16 2.32 2.41 2.51  2.71   380 1.00</span></span>
+<span><span class="co">#&gt; R[119] 2.48    0.01 0.15 2.21 2.38 2.46 2.56  2.78   396 1.00</span></span>
+<span><span class="co">#&gt; R[120] 2.32    0.01 0.12 2.08 2.25 2.33 2.40  2.56   422 1.00</span></span>
+<span><span class="co">#&gt; R[121] 2.20    0.01 0.12 1.99 2.11 2.19 2.28  2.44   410 1.00</span></span>
+<span><span class="co">#&gt; R[122] 2.19    0.01 0.11 2.00 2.12 2.19 2.27  2.43   409 1.00</span></span>
+<span><span class="co">#&gt; R[123] 2.10    0.01 0.11 1.89 2.03 2.11 2.17  2.30   419 0.99</span></span>
+<span><span class="co">#&gt; R[124] 2.07    0.01 0.10 1.90 2.01 2.07 2.13  2.28   358 1.00</span></span>
+<span><span class="co">#&gt; R[125] 2.01    0.00 0.10 1.83 1.94 2.00 2.08  2.19   426 1.00</span></span>
+<span><span class="co">#&gt; R[126] 1.90    0.00 0.09 1.74 1.84 1.90 1.96  2.07   361 1.00</span></span>
+<span><span class="co">#&gt; R[127] 1.95    0.00 0.09 1.77 1.89 1.95 2.01  2.13   445 1.00</span></span>
+<span><span class="co">#&gt; R[128] 1.89    0.00 0.08 1.75 1.84 1.89 1.95  2.06   308 1.00</span></span>
+<span><span class="co">#&gt; R[129] 1.80    0.00 0.08 1.66 1.74 1.79 1.86  1.95   376 1.00</span></span>
+<span><span class="co">#&gt; R[130] 1.75    0.00 0.08 1.60 1.70 1.74 1.80  1.90   382 1.00</span></span>
+<span><span class="co">#&gt; R[131] 1.69    0.00 0.07 1.57 1.65 1.69 1.74  1.82   409 1.01</span></span>
+<span><span class="co">#&gt; R[132] 1.49    0.00 0.06 1.37 1.45 1.49 1.53  1.62   381 1.00</span></span>
+<span><span class="co">#&gt; R[133] 1.44    0.00 0.06 1.34 1.40 1.44 1.48  1.56   343 0.99</span></span>
+<span><span class="co">#&gt; R[134] 1.31    0.00 0.06 1.19 1.28 1.32 1.35  1.42   432 1.00</span></span>
+<span><span class="co">#&gt; R[135] 1.36    0.00 0.05 1.26 1.33 1.36 1.40  1.46   351 1.00</span></span>
+<span><span class="co">#&gt; R[136] 1.29    0.00 0.05 1.19 1.26 1.29 1.33  1.40   375 1.00</span></span>
+<span><span class="co">#&gt; R[137] 1.12    0.00 0.05 1.04 1.09 1.12 1.15  1.22   414 0.99</span></span>
+<span><span class="co">#&gt; R[138] 1.02    0.00 0.05 0.94 0.99 1.02 1.05  1.12   329 1.00</span></span>
+<span><span class="co">#&gt; R[139] 0.93    0.00 0.04 0.85 0.90 0.93 0.96  1.02   432 1.00</span></span>
+<span><span class="co">#&gt; R[140] 0.86    0.00 0.04 0.78 0.84 0.86 0.90  0.95   406 0.99</span></span>
+<span><span class="co">#&gt; R[141] 0.85    0.00 0.04 0.77 0.82 0.84 0.87  0.93   444 0.99</span></span>
+<span><span class="co">#&gt; R[142] 0.80    0.00 0.04 0.72 0.77 0.80 0.82  0.88   318 1.01</span></span>
+<span><span class="co">#&gt; R[143] 0.67    0.00 0.04 0.60 0.65 0.67 0.70  0.73   423 0.99</span></span>
+<span><span class="co">#&gt; R[144] 0.61    0.00 0.03 0.55 0.59 0.62 0.64  0.68   424 0.99</span></span>
+<span><span class="co">#&gt; R[145] 0.48    0.00 0.03 0.42 0.45 0.48 0.50  0.54   349 1.00</span></span>
+<span><span class="co">#&gt; R[146] 0.42    0.00 0.03 0.36 0.40 0.41 0.43  0.47   441 1.00</span></span>
+<span><span class="co">#&gt; R[147] 0.40    0.00 0.03 0.34 0.38 0.40 0.42  0.47   459 1.00</span></span>
+<span><span class="co">#&gt; R[148] 0.37    0.00 0.03 0.31 0.35 0.37 0.39  0.42   381 1.00</span></span>
+<span><span class="co">#&gt; R[149] 0.32    0.00 0.03 0.26 0.30 0.32 0.34  0.37   404 1.00</span></span>
+<span><span class="co">#&gt; R[150] 0.26    0.00 0.03 0.21 0.24 0.25 0.27  0.31   257 1.00</span></span>
+<span><span class="co">#&gt; R[151] 0.20    0.00 0.02 0.16 0.19 0.20 0.22  0.25   465 0.99</span></span>
+<span><span class="co">#&gt; R[152] 0.21    0.00 0.03 0.16 0.19 0.20 0.23  0.26   517 1.00</span></span>
+<span><span class="co">#&gt; R[153] 0.17    0.00 0.02 0.13 0.15 0.17 0.18  0.22   408 1.01</span></span>
+<span><span class="co">#&gt; R[154] 0.13    0.00 0.02 0.09 0.12 0.13 0.15  0.17   519 1.00</span></span>
+<span><span class="co">#&gt; R[155] 0.12    0.00 0.02 0.08 0.10 0.12 0.13  0.17   509 0.99</span></span>
+<span><span class="co">#&gt; R[156] 0.09    0.00 0.02 0.05 0.07 0.08 0.10  0.13   587 1.00</span></span>
+<span><span class="co">#&gt; R[157] 0.09    0.00 0.02 0.05 0.08 0.09 0.11  0.14   807 0.99</span></span>
+<span><span class="co">#&gt; R[158] 0.11    0.00 0.03 0.06 0.09 0.11 0.12  0.16   566 1.00</span></span>
+<span><span class="co">#&gt; R[159] 0.11    0.00 0.03 0.06 0.09 0.10 0.12  0.17   409 0.99</span></span>
+<span><span class="co">#&gt; R[160] 0.10    0.00 0.03 0.05 0.08 0.10 0.12  0.17   423 0.99</span></span>
+<span><span class="co">#&gt; R[161] 0.12    0.00 0.04 0.05 0.09 0.12 0.14  0.20   466 0.99</span></span>
+<span><span class="co">#&gt; R[162] 0.12    0.00 0.04 0.05 0.09 0.12 0.15  0.20   455 0.99</span></span>
+<span><span class="co">#&gt; R[163] 0.16    0.00 0.05 0.09 0.13 0.16 0.19  0.27   380 1.00</span></span>
+<span><span class="co">#&gt; R[164] 0.17    0.00 0.05 0.08 0.14 0.17 0.21  0.27   349 1.01</span></span>
+<span><span class="co">#&gt; R[165] 0.21    0.00 0.07 0.11 0.16 0.20 0.25  0.37   286 1.00</span></span>
+<span><span class="co">#&gt; R[166] 0.22    0.00 0.07 0.10 0.17 0.21 0.27  0.39   362 1.00</span></span>
+<span><span class="co">#&gt; R[167] 0.28    0.00 0.09 0.14 0.22 0.27 0.33  0.47   340 1.00</span></span>
+<span><span class="co">#&gt; R[168] 0.33    0.01 0.10 0.17 0.25 0.32 0.39  0.55   371 1.00</span></span>
+<span><span class="co">#&gt; R[169] 0.44    0.01 0.11 0.24 0.36 0.43 0.50  0.70   363 1.00</span></span>
+<span><span class="co">#&gt; R[170] 0.49    0.01 0.13 0.27 0.40 0.48 0.56  0.76   345 1.00</span></span>
+<span><span class="co">#&gt; R[171] 0.56    0.01 0.14 0.31 0.46 0.55 0.64  0.85   319 1.01</span></span>
+<span><span class="co">#&gt; R[172] 0.65    0.01 0.15 0.35 0.54 0.65 0.75  0.98   301 1.00</span></span>
+<span><span class="co">#&gt; R[173] 0.77    0.01 0.17 0.45 0.65 0.77 0.88  1.13   426 1.00</span></span>
+<span><span class="co">#&gt; R[174] 0.89    0.01 0.18 0.58 0.76 0.89 1.01  1.24   495 1.00</span></span>
+<span><span class="co">#&gt; R[175] 0.96    0.01 0.19 0.63 0.82 0.94 1.08  1.35   575 0.99</span></span>
+<span><span class="co">#&gt; R[176] 1.05    0.01 0.20 0.70 0.91 1.02 1.18  1.43   548 0.99</span></span>
+<span><span class="co">#&gt; R[177] 1.13    0.01 0.21 0.74 0.99 1.12 1.26  1.56   486 1.00</span></span>
+<span><span class="co">#&gt; R[178] 1.19    0.01 0.21 0.83 1.04 1.18 1.32  1.64   465 0.99</span></span>
+<span><span class="co">#&gt; R[179] 1.28    0.01 0.22 0.92 1.13 1.25 1.40  1.79   540 0.99</span></span>
+<span><span class="co">#&gt; R[180] 1.30    0.01 0.21 0.92 1.15 1.30 1.45  1.75   524 1.00</span></span>
+<span><span class="co">#&gt; R[181] 1.36    0.01 0.22 0.95 1.20 1.36 1.50  1.79   503 1.00</span></span>
+<span><span class="co">#&gt; R[182] 1.47    0.01 0.24 1.02 1.32 1.46 1.62  1.97   570 1.00</span></span>
+<span><span class="co">#&gt; R[183] 1.56    0.01 0.23 1.14 1.41 1.55 1.71  2.01   555 1.00</span></span>
+<span><span class="co">#&gt; R[184] 1.68    0.01 0.24 1.25 1.51 1.68 1.83  2.17   583 1.00</span></span>
+<span><span class="co">#&gt; R[185] 1.82    0.01 0.23 1.40 1.66 1.81 1.98  2.31   691 0.99</span></span>
+<span><span class="co">#&gt; R[186] 1.85    0.01 0.23 1.44 1.67 1.85 2.00  2.30   675 0.99</span></span>
+<span><span class="co">#&gt; R[187] 1.87    0.01 0.24 1.44 1.69 1.87 2.04  2.34   620 0.99</span></span>
+<span><span class="co">#&gt; R[188] 1.96    0.01 0.24 1.53 1.80 1.97 2.13  2.40   663 0.99</span></span>
+<span><span class="co">#&gt; R[189] 2.05    0.01 0.24 1.61 1.89 2.03 2.21  2.52   570 1.00</span></span>
+<span><span class="co">#&gt; R[190] 2.02    0.01 0.23 1.60 1.85 2.01 2.18  2.52   568 0.99</span></span>
+<span><span class="co">#&gt; R[191] 2.01    0.01 0.23 1.62 1.85 2.00 2.16  2.48   735 0.99</span></span>
+<span><span class="co">#&gt; R[192] 2.03    0.01 0.22 1.64 1.89 2.01 2.17  2.46   764 0.99</span></span>
+<span><span class="co">#&gt; R[193] 2.11    0.01 0.22 1.68 1.97 2.10 2.26  2.61   595 1.00</span></span>
+<span><span class="co">#&gt; R[194] 2.23    0.01 0.21 1.83 2.09 2.23 2.36  2.70   482 1.00</span></span>
+<span><span class="co">#&gt; R[195] 2.28    0.01 0.21 1.84 2.14 2.26 2.41  2.75   670 1.00</span></span>
+<span><span class="co">#&gt; R[196] 2.35    0.01 0.21 1.99 2.22 2.34 2.49  2.77   540 0.99</span></span>
+<span><span class="co">#&gt; R[197] 2.42    0.01 0.20 2.06 2.29 2.41 2.56  2.81   470 1.00</span></span>
+<span><span class="co">#&gt; R[198] 2.30    0.01 0.19 1.92 2.17 2.29 2.43  2.68   469 0.99</span></span>
+<span><span class="co">#&gt; R[199] 2.31    0.01 0.19 1.93 2.18 2.31 2.42  2.71   588 1.00</span></span>
+<span><span class="co">#&gt; R[200] 2.20    0.01 0.20 1.83 2.06 2.19 2.33  2.62   447 0.99</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Samples were drawn using NUTS(diag_e) at Mon Aug 12 16:04:18 2024.</span></span>
+<span><span class="co">#&gt; For each parameter, n_eff is a crude measure of effective sample size,</span></span>
+<span><span class="co">#&gt; and Rhat is the potential scale reduction factor on split chains (at </span></span>
+<span><span class="co">#&gt; convergence, Rhat=1).</span></span></code></pre></div>
+<p>We now overlay the estimated
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>R</mi><mi>t</mi></msub><annotation encoding="application/x-tex">R_t</annotation></semantics></math>
+versus the actual values. The estimated
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>R</mi><mi>t</mi></msub><annotation encoding="application/x-tex">R_t</annotation></semantics></math>
+values coincide reasonably with the true values.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># extract posterior quantiles</span></span>
+<span><span class="va">R_draws</span> <span class="op">&lt;-</span> <span class="fu">rstan</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/rstan/reference/stanfit-method-extract.html" class="external-link">extract</a></span><span class="op">(</span><span class="va">fit</span>, <span class="st">"R"</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="va">lower</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">R_draws</span>, <span class="fl">2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">0.025</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">middle</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">R_draws</span>, <span class="fl">2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">0.5</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">upper</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">R_draws</span>, <span class="fl">2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">0.975</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># plot</span></span>
+<span><span class="va">epidemic_df</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
+<span>    lower<span class="op">=</span><span class="va">lower</span>,</span>
+<span>    middle<span class="op">=</span><span class="va">middle</span>,</span>
+<span>    upper<span class="op">=</span><span class="va">upper</span></span>
+<span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">t</span>, <span class="va">R_t</span>, <span class="va">lower</span>, <span class="va">middle</span>, <span class="va">upper</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">t</span>, y<span class="op">=</span><span class="va">R_t</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>colour<span class="op">=</span><span class="st">"red"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>ymin<span class="op">=</span><span class="va">lower</span>, ymax<span class="op">=</span><span class="va">upper</span><span class="op">)</span>, fill<span class="op">=</span><span class="st">"blue"</span>, alpha<span class="op">=</span><span class="fl">0.4</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y<span class="op">=</span><span class="va">middle</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="fitting_synthetic_data_using_epidp_files/figure-html/unnamed-chunk-6-1.png" width="700"></p>
+</div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 
