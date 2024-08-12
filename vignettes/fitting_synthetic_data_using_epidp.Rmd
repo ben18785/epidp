@@ -58,17 +58,20 @@ i_0 <- 10
 epidemic_df <- simulate_renewal_epidemic(rt_fun, nt, mean_si, sd_si, i_0)
 
 # plot
+transform_factor <- 300
 epidemic_df %>%
   select(-c(w_dist, lambda_t)) %>%
+  mutate(R_t = R_t * transform_factor) %>% 
   pivot_longer(c(i_t, R_t)) %>%
   ggplot(aes(x = t, y = value, colour = name)) +
   geom_line() +
   scale_y_continuous(
     name = "Incidence (i_t)",
-    sec.axis = sec_axis(~ . / 1000, name = "Reproduction Number (R_t)")
+    sec.axis = sec_axis(~ . / transform_factor, name = "Reproduction Number (R_t)")
   ) +
-  labs(x = "Time", colour = "Variable") +
-  theme_minimal()
+  labs(x = "Time") +
+  theme_minimal() +
+  scale_color_brewer("Series", palette = "Dark2")
 ```
 
 We now use a Stan version of EpiFilter to estimate the maximum a posteriori estimates
