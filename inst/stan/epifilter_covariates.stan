@@ -1,6 +1,6 @@
 data {
   int N; // number of data points
-  int C[N]; // case series
+  array[N] int C; // case series
   int wmax; // max day of generation time distribution
   row_vector[wmax] w; // generation time distribution
   int N_covariates;
@@ -10,13 +10,13 @@ data {
 parameters {
   real<lower=0> sigma;
   vector[N_covariates] beta;
-  real<lower=0> epsilon[N];
+  vector<lower=0>[N] epsilon;
 }
 
 transformed parameters {
 
-  real E_cases[N];
-  real<lower=0> R[N];
+  vector[N] E_cases;
+  vector<lower=0>[N] R;
 
   {
     vector[wmax] I_temp;

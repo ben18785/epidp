@@ -1,18 +1,18 @@
 data {
   int N; // number of data points
-  int C[N]; // case series
+  array[N] int C; // case series
   int wmax; // max day of generation time distribution
   row_vector[wmax] w;
 }
 
 parameters {
-  real<lower=0> R[N];
+  vector<lower=0>[N] R;
   real<lower=0> sigma;
 }
 
 transformed parameters {
 
-  real E_cases[N];
+  vector[N] E_cases;
 
   {
     vector[wmax] I_temp;
