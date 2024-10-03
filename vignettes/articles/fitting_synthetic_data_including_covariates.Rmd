@@ -19,8 +19,7 @@ library(tidyr)
 options(mc.cores=4)
 ```
 
-In this document, we explore how the incorporation of covariate information affects
-estimation of $R_t$.
+In this document, we explore how the incorporation of covariate information affects estimation of $R_t$.
 
 ## Added Gaussian noise around a sinusoidal covariate-driven mean $R_t$
 ```{r}

@@ -1,0 +1,136 @@
+---
+title: "Fitting real COVID-19 case data"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(epidp)
+library(ggplot2)
+library(dplyr)
+library(magrittr)
+library(purrr)
+library(tidyr)
+```
+
+# Estimating $R_t$ for Bogota using only the case data
+We first load the COVID-19 data for Colombia and graph it.
+```{r}
+# load data
+data("covid_colombia_cases_deaths_mobility")
+
+# plot
+covid_colombia_cases_deaths_mobility %>% 
+  pivot_longer(c(cases, deaths)) %>%
+  ggplot(aes(x=date, y=value)) +
+  geom_line() +
+  facet_grid(vars(name), vars(city),
+             scales="free") +
+  xlab("Date") +
+  ylab("Count")
+```
+We first estimate $R_t$ for Bogota using only the case data using optimisation to give us a quick set of estimates.
+```{r}
+df_bogota <- covid_colombia_cases_deaths_mobility %>% 
+  filter(city=="Bogota")
+
+# generate serial interval for COVID-19 based on reasonable mean, sd
+mean_si <- 6.5
+sd_si <- 4.03
+w <- generate_vector_serial(nrow(df_bogota), mean_si, sd_si)
+
+# fit using optimisation
+fit <- fit_epifilter(
+  N=nrow(df_bogota),
+  C=df_bogota$cases,
+  w=w,
+  is_sampling=FALSE,
+  as_vector=FALSE
+)
+
+# plot
+R <- fit$par$R
+df_bogota %>% 
+  mutate(Rt=R) %>% 
+  select(date, Rt, cases) %>% 
+  filter(date >= as.Date("2020-04-01")) %>% 
+  pivot_longer(-date) %>% 
+  ggplot(aes(x=date, y=value)) +
+  geom_line() +
+  scale_color_brewer("R_t", palette = "Dark2") +
+  ylab("R_t") +
+  facet_grid(vars(name), scales = "free")
+```
+We now fit using a fully Bayesian framework which outputs uncertainty.
+```{r}
+fit <- fit_epifilter(
+  N=nrow(df_bogota),
+  C=df_bogota$cases,
+  w=w,
+  is_sampling=TRUE,
+  iter=50,
+  chains=1 # as CRAN does not allow multiple cores
+)
+
+# extract posterior quantiles
+R_draws <- rstan::extract(fit, "R")[[1]]
+lower <- apply(R_draws, 2, function(x) quantile(x, 0.025))
+middle <- apply(R_draws, 2, function(x) quantile(x, 0.5))
+upper <- apply(R_draws, 2, function(x) quantile(x, 0.975))
+
+# plot
+df_bogota %>% 
+  mutate(
+    lower=lower,
+    middle=middle,
+    upper=upper
+  ) %>% 
+  select(date, lower, middle, upper) %>% 
+  filter(date >= as.Date("2020-04-01")) %>% 
+  ggplot(aes(x=date)) +
+  geom_ribbon(aes(ymin=lower, ymax=upper), fill="blue", alpha=0.6) +
+  geom_line(aes(y=middle), colour="blue") +
+  geom_hline(yintercept = 1, linetype=2, colour="orange") +
+  xlab("Date") +
+  ylab("R_t")
+```
+
+# Probing the drivers of $R_t$ using mobility data
+We assume a relationship between workplace mobility $m_t$ and $R_t$ of the form:
+
+$$
+\log(R_t) = \alpha + \beta m_t + \epsilon_t,
+$$
+
+where $\epsilon_t$ represents the components of $R_t$ unrelated to workplace mobility.
+
+We now fit this model using `epidp`.
+
+```{r}
+X <- tibble(
+  cons=rep(1, nrow(df_bogota)),
+  m=df_bogota$workplaces
+  ) %>% 
+  mutate(
+    m=scale(m)[, 1]
+  ) %>% 
+  as.matrix()
+
+fit <- fit_epifilter_covariates(
+  N=nrow(df_bogota),
+  C=df_bogota$cases,
+  w=w,
+  X=X,
+  is_sampling=TRUE,
+  iter=50, # probably too few iterations
+  chains=1 # as CRAN does not allow multiple cores; should run with more cores
+)
+
+print(fit, "beta[2]")
+```
+This negative association probably is a result of individuals responding to the COVID-19 pandemic conditions or governmental policy.
