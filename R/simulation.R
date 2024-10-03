@@ -18,10 +18,8 @@
 #' function (CDF) of the gamma distribution at successive integer time points.
 #'
 #' @examples
-#' \dontrun{
 #' generate_vector_serial(10, 5, 2)
 #' }
-#' @export
 generate_vector_serial <- function(nt, mean_si, sd_si) {
 
   if (!is.numeric(nt) || nt <= 0 || nt != as.integer(nt)) {
@@ -40,7 +38,7 @@ generate_vector_serial <- function(nt, mean_si, sd_si) {
 
   # Time points and cumulative distribution values
   tdist <- 0:nt
-  cdf_vals <- pgamma(tdist, shape = shape, scale = scale)
+  cdf_vals <- stats::pgamma(tdist, shape = shape, scale = scale)
 
   # Compute differences to get the discretized distribution
   w_dist <- diff(cdf_vals)
@@ -54,7 +52,7 @@ generate_vector_serial <- function(nt, mean_si, sd_si) {
 #' specified time-varying reproduction number (Rt), the serial interval distribution
 #' characterized by a gamma distribution, and an initial number of cases.
 #'
-#' @param rt_fun A function that takes a vector of time points and returns a vector
+#' @param Rt_fun A function that takes a vector of time points and returns a vector
 #'   of reproduction numbers (Rt) corresponding to those time points.
 #' @param nt An integer specifying the number of time points (duration of the epidemic simulation).
 #' @param mean_si A numeric value representing the mean of the serial interval distribution.
@@ -79,10 +77,8 @@ generate_vector_serial <- function(nt, mean_si, sd_si) {
 #' the time-varying reproduction number.
 #'
 #' @examples
-#' \dontrun{
 #' rt_fun <- function(t) { 1.5 * exp(-0.05 * t) }
 #' simulate_renewal_epidemic(rt_fun, 100, 5, 2, 10)
-#' }
 #' @export
 simulate_renewal_epidemic <- function(Rt_fun, nt, mean_si, sd_si, i_0, X=NULL){
 
@@ -126,7 +122,7 @@ simulate_renewal_epidemic <- function(Rt_fun, nt, mean_si, sd_si, i_0, X=NULL){
     # Total infectiousness is a convolution
     Lt[i] = sum(It[seq(i-1, 1, -1)] * w_dist[1:(i-1)])
     # Poisson renewal model
-    It[i] = rpois(1, Lt[i] * Rt[i])
+    It[i] = stats::rpois(1, Lt[i] * Rt[i])
   }
 
   data.frame(t=t, i_t=It, R_t=Rt, lambda_t=Lt, w_dist=w_dist)

@@ -35,7 +35,7 @@ fit_epifilter <- function(N, C, w, is_sampling=TRUE, ...) {
 #'
 #' @return a stanfit object
 #' @export
-fit_epifilter_covariates <- function(N, C, w, X, ...) {
+fit_epifilter_covariates <- function(N, C, w, X, is_sampling=TRUE, ...) {
   wmax <- length(w)
   N_covariates <- dim(X)[2]
   standata <- list(N=N,

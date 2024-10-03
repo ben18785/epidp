@@ -128,5 +128,4 @@ epidemic_df %>%
 ## Contributing guidelines
 
 We welcome contributions from collaborators. Before doing so, we ask
-that you read our [contributing guidelines](contributing-guidelines.md)
-section.
+that you read our [contributing guidelines](CONTRIBUTING.md) section.

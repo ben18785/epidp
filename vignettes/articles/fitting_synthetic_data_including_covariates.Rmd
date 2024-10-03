@@ -69,7 +69,8 @@ fit <- fit_epifilter(
   N=length(epidemic_df$i_t),
   C=epidemic_df$i_t,
   w=epidemic_df$w_dist,
-  iter=200
+  iter=200,
+  chains=1 # to pass CRAN
 )
 
 # look at MCMC summaries
