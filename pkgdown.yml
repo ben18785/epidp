@@ -1,10 +1,10 @@
 pandoc: 3.1.11
-pkgdown: 2.1.0
+pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
   articles/fitting_synthetic_data_including_covariates: fitting_synthetic_data_including_covariates.html
   fitting_synthetic_data_using_epidp: fitting_synthetic_data_using_epidp.html
-last_built: 2024-09-17T16:48Z
+last_built: 2024-10-03T16:11Z
 urls:
   reference: https://ben18785.github.io/epidp/reference
   article: https://ben18785.github.io/epidp/articles
