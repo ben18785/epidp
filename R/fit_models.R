@@ -6,7 +6,8 @@
 #' @param w discretised serial interval
 #' @param is_sampling Boolean indicating if sampling is to be used (if TRUE) or
 #' optimisation (if FALSE). Defaults to TRUE
-#' @param ...
+#' @param ... Arguments passed to [rstan::sampling()] (if `is_sampling=TRUE`) or
+#' [rstan::optimizing()] (if `is_sampling=FALSE`)
 #'
 #' @return a stanfit object
 #' @export
@@ -26,12 +27,9 @@ fit_epifilter <- function(N, C, w, is_sampling=TRUE, ...) {
 #' Estimate the time-varying reproduction number from incidence data using covariate
 #' data
 #'
-#' @param N number of data points
-#' @param C case counts
-#' @param w discretised serial interval
+#' @inheritParams fit_epifilter
 #' @param X matrix of covariates (which likely should include a first column of 1s)
 #' of dimensions N x (N_covariates + 1)
-#' @param ...
 #'
 #' @return a stanfit object
 #' @export
