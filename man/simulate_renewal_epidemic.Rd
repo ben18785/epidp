@@ -7,6 +7,9 @@
 simulate_renewal_epidemic(Rt_fun, nt, mean_si, sd_si, i_0, X = NULL)
 }
 \arguments{
+\item{Rt_fun}{A function that takes a vector of time points and returns a vector
+of reproduction numbers (Rt) corresponding to those time points.}
+
 \item{nt}{An integer specifying the number of time points (duration of the epidemic simulation).}
 
 \item{mean_si}{A numeric value representing the mean of the serial interval distribution.}
@@ -16,9 +19,6 @@ simulate_renewal_epidemic(Rt_fun, nt, mean_si, sd_si, i_0, X = NULL)
 \item{i_0}{An integer specifying the initial number of cases at time point 1.}
 
 \item{X}{An optional matrix of covariates with \code{nt} rows.}
-
-\item{rt_fun}{A function that takes a vector of time points and returns a vector
-of reproduction numbers (Rt) corresponding to those time points.}
 }
 \value{
 A list containing the following components:
@@ -43,8 +43,6 @@ as a Poisson random variable with a mean equal to the product of the total infec
 the time-varying reproduction number.
 }
 \examples{
-\dontrun{
 rt_fun <- function(t) { 1.5 * exp(-0.05 * t) }
 simulate_renewal_epidemic(rt_fun, 100, 5, 2, 10)
-}
 }
