@@ -17,6 +17,7 @@ knitr::opts_chunk$set(
 
 <!-- badges: start -->
 [![codecov](https://codecov.io/github/ben18785/epidp/graph/badge.svg?token=STG0INT235)](https://codecov.io/github/ben18785/epidp)
+[![R-CMD-check](https://github.com/ben18785/epidp/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ben18785/epidp/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The goal of `epidp` is to allow covariate information to inform estimates of the time-varying reproduction number, $R_t$.
