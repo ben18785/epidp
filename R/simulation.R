@@ -17,6 +17,7 @@
 #'
 #' @examples
 #' generate_vector_serial(10, 5, 2)
+#' @export
 generate_vector_serial <- function(nt, mean_si, sd_si) {
   if (!is.numeric(nt) || nt <= 0 || nt != as.integer(nt)) {
     stop("Parameter 'nt' should be a positive integer.")
