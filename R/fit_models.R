@@ -1,4 +1,3 @@
-
 #' Estimate the time-varying reproduction number from incidence data
 #'
 #' @param N number of data points
@@ -11,16 +10,19 @@
 #'
 #' @return a stanfit object
 #' @export
-fit_epifilter <- function(N, C, w, is_sampling=TRUE, ...) {
+fit_epifilter <- function(N, C, w, is_sampling = TRUE, ...) {
   wmax <- length(w)
-  standata <- list(N=N,
-                   C=C,
-                   wmax=wmax,
-                   w=w)
-  if(is_sampling)
+  standata <- list(
+    N = N,
+    C = C,
+    wmax = wmax,
+    w = w
+  )
+  if (is_sampling) {
     out <- rstan::sampling(stanmodels$epifilter, data = standata, ...)
-  else
+  } else {
     out <- rstan::optimizing(stanmodels$epifilter, data = standata, ...)
+  }
   return(out)
 }
 
@@ -33,18 +35,21 @@ fit_epifilter <- function(N, C, w, is_sampling=TRUE, ...) {
 #'
 #' @return a stanfit object
 #' @export
-fit_epifilter_covariates <- function(N, C, w, X, is_sampling=TRUE, ...) {
+fit_epifilter_covariates <- function(N, C, w, X, is_sampling = TRUE, ...) {
   wmax <- length(w)
   N_covariates <- dim(X)[2]
-  standata <- list(N=N,
-                   C=C,
-                   w=w,
-                   wmax=wmax,
-                   N_covariates=N_covariates,
-                   X=X)
-  if(is_sampling)
+  standata <- list(
+    N = N,
+    C = C,
+    w = w,
+    wmax = wmax,
+    N_covariates = N_covariates,
+    X = X
+  )
+  if (is_sampling) {
     out <- rstan::sampling(stanmodels$epifilter_covariates, data = standata, ...)
-  else
+  } else {
     out <- rstan::optimizing(stanmodels$epifilter_covariates, data = standata, ...)
+  }
   return(out)
 }
