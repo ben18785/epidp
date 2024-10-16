@@ -68,14 +68,18 @@ test_that("Function handles non-numeric sd_si", {
 })
 
 test_that("simulate_renewal_epidemic returns a data frame", {
-  rt_fun <- function(t) { 1.5 * exp(-0.05 * t) }
+  rt_fun <- function(t) {
+    1.5 * exp(-0.05 * t)
+  }
   result <- simulate_renewal_epidemic(rt_fun, 100, 5, 2, 10)
   expect_type(result, "list")
   expect_s3_class(result, "data.frame")
 })
 
 test_that("simulate_renewal_epidemic returns correct dimensions", {
-  rt_fun <- function(t) { 1.5 * exp(-0.05 * t) }
+  rt_fun <- function(t) {
+    1.5 * exp(-0.05 * t)
+  }
   nt <- 100
   result <- simulate_renewal_epidemic(rt_fun, nt, 5, 2, 10)
   expect_equal(nrow(result), nt)
@@ -83,14 +87,18 @@ test_that("simulate_renewal_epidemic returns correct dimensions", {
 })
 
 test_that("simulate_renewal_epidemic returns a data frame", {
-  rt_fun <- function(t) { 1.5 * exp(-0.05 * t) }
+  rt_fun <- function(t) {
+    1.5 * exp(-0.05 * t)
+  }
   result <- simulate_renewal_epidemic(rt_fun, 100, 5, 2, 10)
   expect_type(result, "list")
   expect_s3_class(result, "data.frame")
 })
 
 test_that("simulate_renewal_epidemic returns correct dimensions", {
-  rt_fun <- function(t) { 1.5 * exp(-0.05 * t) }
+  rt_fun <- function(t) {
+    1.5 * exp(-0.05 * t)
+  }
   nt <- 100
   result <- simulate_renewal_epidemic(rt_fun, nt, 5, 2, 10)
   expect_equal(nrow(result), nt)
@@ -98,28 +106,36 @@ test_that("simulate_renewal_epidemic returns correct dimensions", {
 })
 
 test_that("simulate_renewal_epidemic handles invalid nt", {
-  rt_fun <- function(t) { 1.5 * exp(-0.05 * t) }
+  rt_fun <- function(t) {
+    1.5 * exp(-0.05 * t)
+  }
   expect_error(simulate_renewal_epidemic(rt_fun, -10, 5, 2, 10), "Parameter 'nt' should be a positive integer.")
   expect_error(simulate_renewal_epidemic(rt_fun, 0, 5, 2, 10), "Parameter 'nt' should be a positive integer.")
   expect_error(simulate_renewal_epidemic(rt_fun, 10.5, 5, 2, 10), "Parameter 'nt' should be a positive integer.")
 })
 
 test_that("simulate_renewal_epidemic handles invalid mean_si", {
-  rt_fun <- function(t) { 1.5 * exp(-0.05 * t) }
+  rt_fun <- function(t) {
+    1.5 * exp(-0.05 * t)
+  }
   expect_error(simulate_renewal_epidemic(rt_fun, 100, -5, 2, 10), "Parameter 'mean_si' should be a positive numeric value.")
   expect_error(simulate_renewal_epidemic(rt_fun, 100, 0, 2, 10), "Parameter 'mean_si' should be a positive numeric value.")
   expect_error(simulate_renewal_epidemic(rt_fun, 100, "five", 2, 10), "Parameter 'mean_si' should be a positive numeric value.")
 })
 
 test_that("simulate_renewal_epidemic handles invalid sd_si", {
-  rt_fun <- function(t) { 1.5 * exp(-0.05 * t) }
+  rt_fun <- function(t) {
+    1.5 * exp(-0.05 * t)
+  }
   expect_error(simulate_renewal_epidemic(rt_fun, 100, 5, -2, 10), "Parameter 'sd_si' should be a positive numeric value.")
   expect_error(simulate_renewal_epidemic(rt_fun, 100, 5, 0, 10), "Parameter 'sd_si' should be a positive numeric value.")
   expect_error(simulate_renewal_epidemic(rt_fun, 100, 5, "two", 10), "Parameter 'sd_si' should be a positive numeric value.")
 })
 
 test_that("simulate_renewal_epidemic handles invalid i_0", {
-  rt_fun <- function(t) { 1.5 * exp(-0.05 * t) }
+  rt_fun <- function(t) {
+    1.5 * exp(-0.05 * t)
+  }
   expect_error(simulate_renewal_epidemic(rt_fun, 100, 5, 2, -10), "Parameter 'i_0' should be a positive integer.")
   expect_error(simulate_renewal_epidemic(rt_fun, 100, 5, 2, 0), "Parameter 'i_0' should be a positive integer.")
   expect_error(simulate_renewal_epidemic(rt_fun, 100, 5, 2, 10.5), "Parameter 'i_0' should be a positive integer.")
@@ -131,7 +147,9 @@ test_that("simulate_renewal_epidemic handles invalid Rt_fun", {
 })
 
 test_that("simulate_renewal_epidemic returns consistent results for fixed Rt_fun", {
-  rt_fun <- function(t) { rep(2, length(t)) }
+  rt_fun <- function(t) {
+    rep(2, length(t))
+  }
   set.seed(123)
   result1 <- simulate_renewal_epidemic(rt_fun, 10, 2, 1, 1)
   set.seed(123)
@@ -140,7 +158,9 @@ test_that("simulate_renewal_epidemic returns consistent results for fixed Rt_fun
 })
 
 test_that("simulate_renewal_epidemic produces non-negative incidence", {
-  rt_fun <- function(t) { 1.5 * exp(-0.05 * t) }
+  rt_fun <- function(t) {
+    1.5 * exp(-0.05 * t)
+  }
   result <- simulate_renewal_epidemic(rt_fun, 100, 5, 2, 10)
   expect_true(all(result$i_t >= 0))
 })

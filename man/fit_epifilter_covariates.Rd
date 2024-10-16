@@ -5,7 +5,7 @@
 \title{Estimate the time-varying reproduction number from incidence data using covariate
 data}
 \usage{
-fit_epifilter_covariates(N, C, w, X, ...)
+fit_epifilter_covariates(N, C, w, X, is_sampling = TRUE, ...)
 }
 \arguments{
 \item{N}{number of data points}
@@ -17,7 +17,11 @@ fit_epifilter_covariates(N, C, w, X, ...)
 \item{X}{matrix of covariates (which likely should include a first column of 1s)
 of dimensions N x (N_covariates + 1)}
 
-\item{...}{}
+\item{is_sampling}{Boolean indicating if sampling is to be used (if TRUE) or
+optimisation (if FALSE). Defaults to TRUE}
+
+\item{...}{Arguments passed to \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}} (if \code{is_sampling=TRUE}) or
+\code{\link[rstan:stanmodel-method-optimizing]{rstan::optimizing()}} (if \code{is_sampling=FALSE})}
 }
 \value{
 a stanfit object

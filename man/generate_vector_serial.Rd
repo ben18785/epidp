@@ -27,7 +27,5 @@ The discretization is performed by computing the difference in the cumulative di
 function (CDF) of the gamma distribution at successive integer time points.
 }
 \examples{
-\dontrun{
 generate_vector_serial(10, 5, 2)
-}
 }

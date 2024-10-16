@@ -36,13 +36,14 @@ where $\Lambda:=\sum_{s=1}^t \omega_s I_{t-s}$.
 ## Step function in $R_t$
 We first generate case data assuming a step function for $R_t$.
 ```{r}
-rt_fun = function(t){
-  if(t <= 60)
-    R = 2
-  else if (t <= 90)
-    R = 0.5
-  else
-    R = 1
+rt_fun <- function(t) {
+  if (t <= 60) {
+    R <- 2
+  } else if (t <= 90) {
+    R <- 0.5
+  } else {
+    R <- 1
+  }
   R
 }
 
@@ -59,7 +60,7 @@ epidemic_df <- simulate_renewal_epidemic(rt_fun, nt, mean_si, sd_si, i_0)
 transform_factor <- 300
 epidemic_df %>%
   select(-c(w_dist, lambda_t)) %>%
-  mutate(R_t = R_t * transform_factor) %>% 
+  mutate(R_t = R_t * transform_factor) %>%
   pivot_longer(c(i_t, R_t)) %>%
   ggplot(aes(x = t, y = value, colour = name)) +
   geom_line() +
@@ -80,22 +81,22 @@ period when case counts are low.
 ```{r}
 # fit model
 fit <- fit_epifilter(
-  N=length(epidemic_df$i_t),
-  C=epidemic_df$i_t,
-  w=epidemic_df$w_dist,
-  is_sampling=FALSE,
-  as_vector=FALSE
+  N = length(epidemic_df$i_t),
+  C = epidemic_df$i_t,
+  w = epidemic_df$w_dist,
+  is_sampling = FALSE,
+  as_vector = FALSE
 )
 
 # plot
 R <- fit$par$R
-epidemic_df %>% 
-  mutate(estimated=R) %>% 
-  rename(true=R_t) %>% 
-  select(t, estimated, true) %>% 
-  pivot_longer(c(estimated, true)) %>% 
-  ggplot(aes(x=t, y=value)) +
-  geom_line(aes(colour=name)) +
+epidemic_df %>%
+  mutate(estimated = R) %>%
+  rename(true = R_t) %>%
+  select(t, estimated, true) %>%
+  pivot_longer(c(estimated, true)) %>%
+  ggplot(aes(x = t, y = value)) +
+  geom_line(aes(colour = name)) +
   scale_color_brewer("R_t", palette = "Dark2") +
   ylab("R_t")
 ```
@@ -120,7 +121,7 @@ epidemic_df <- simulate_renewal_epidemic(rt_fun, nt, mean_si, sd_si, i_0)
 transform_factor <- 150
 epidemic_df %>%
   select(-c(w_dist, lambda_t)) %>%
-  mutate(R_t = R_t * transform_factor) %>% 
+  mutate(R_t = R_t * transform_factor) %>%
   pivot_longer(c(i_t, R_t)) %>%
   ggplot(aes(x = t, y = value, colour = name)) +
   geom_line() +
@@ -137,10 +138,11 @@ We now use a Stan version of EpiFilter to estimate the $R_t$ profile.
 ```{r}
 # fit model
 fit <- fit_epifilter(
-  N=length(epidemic_df$i_t),
-  C=epidemic_df$i_t,
-  w=epidemic_df$w_dist,
-  iter=200
+  N = length(epidemic_df$i_t),
+  C = epidemic_df$i_t,
+  w = epidemic_df$w_dist,
+  iter = 200,
+  chains = 1 # to pass CRAN
 )
 
 # look at MCMC summaries
@@ -156,17 +158,17 @@ middle <- apply(R_draws, 2, function(x) quantile(x, 0.5))
 upper <- apply(R_draws, 2, function(x) quantile(x, 0.975))
 
 # plot
-epidemic_df %>% 
+epidemic_df %>%
   mutate(
-    lower=lower,
-    middle=middle,
-    upper=upper
-  ) %>% 
-  select(t, R_t, lower, middle, upper) %>% 
-  ggplot(aes(x=t, y=R_t)) +
-  geom_line(colour="red") +
-  geom_ribbon(aes(ymin=lower, ymax=upper), fill="blue", alpha=0.4) +
-  geom_line(aes(y=middle))
+    lower = lower,
+    middle = middle,
+    upper = upper
+  ) %>%
+  select(t, R_t, lower, middle, upper) %>%
+  ggplot(aes(x = t, y = R_t)) +
+  geom_line(colour = "red") +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = "blue", alpha = 0.4) +
+  geom_line(aes(y = middle))
 ```
 
 
