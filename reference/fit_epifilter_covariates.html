@@ -46,7 +46,7 @@ data</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">fit_epifilter_covariates</span><span class="op">(</span><span class="va">N</span>, <span class="va">C</span>, <span class="va">w</span>, <span class="va">X</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">fit_epifilter_covariates</span><span class="op">(</span><span class="va">N</span>, <span class="va">C</span>, <span class="va">w</span>, <span class="va">X</span>, is_sampling <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -70,8 +70,14 @@ data</p>
 of dimensions N x (N_covariates + 1)</p></dd>
 
 
+<dt id="arg-is-sampling">is_sampling<a class="anchor" aria-label="anchor" href="#arg-is-sampling"></a></dt>
+<dd><p>Boolean indicating if sampling is to be used (if TRUE) or
+optimisation (if FALSE). Defaults to TRUE</p></dd>
+
+
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd></dd>
+<dd><p>Arguments passed to <code><a href="https://mc-stan.org/rstan/reference/stanmodel-method-sampling.html" class="external-link">rstan::sampling()</a></code> (if <code>is_sampling=TRUE</code>) or
+<code><a href="https://mc-stan.org/rstan/reference/stanmodel-method-optimizing.html" class="external-link">rstan::optimizing()</a></code> (if <code>is_sampling=FALSE</code>)</p></dd>
 
 </dl></div>
     <div class="section level2">

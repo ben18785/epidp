@@ -5,7 +5,7 @@ articles:
   articles/fitting_real_covid19_data: fitting_real_covid19_data.html
   articles/fitting_synthetic_data_including_covariates: fitting_synthetic_data_including_covariates.html
   fitting_synthetic_data_using_epidp: fitting_synthetic_data_using_epidp.html
-last_built: 2024-10-03T16:58Z
+last_built: 2024-10-25T14:15Z
 urls:
   reference: https://ben18785.github.io/epidp/reference
   article: https://ben18785.github.io/epidp/articles

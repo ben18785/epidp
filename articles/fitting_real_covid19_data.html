@@ -101,12 +101,13 @@ for Bogota using only the case data<a class="anchor" aria-label="anchor" href="#
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"covid_colombia_cases_deaths_mobility"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># plot</span></span>
-<span><span class="va">covid_colombia_cases_deaths_mobility</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span><span class="va">covid_colombia_cases_deaths_mobility</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">cases</span>, <span class="va">deaths</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">date</span>, y<span class="op">=</span><span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">date</span>, y <span class="op">=</span> <span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">name</span><span class="op">)</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">city</span><span class="op">)</span>,</span>
-<span>             scales<span class="op">=</span><span class="st">"free"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    scales <span class="op">=</span> <span class="st">"free"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">xlab</a></span><span class="op">(</span><span class="st">"Date"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">"Count"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="fitting_real_covid19_data_files/figure-html/unnamed-chunk-2-1.png" width="700">
@@ -115,8 +116,8 @@ We first estimate
 for Bogota using only the case data using optimisation to give us a
 quick set of estimates.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">df_bogota</span> <span class="op">&lt;-</span> <span class="va">covid_colombia_cases_deaths_mobility</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">city</span><span class="op">==</span><span class="st">"Bogota"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">df_bogota</span> <span class="op">&lt;-</span> <span class="va">covid_colombia_cases_deaths_mobility</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">city</span> <span class="op">==</span> <span class="st">"Bogota"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># generate serial interval for COVID-19 based on reasonable mean, sd</span></span>
 <span><span class="va">mean_si</span> <span class="op">&lt;-</span> <span class="fl">6.5</span></span>
@@ -125,21 +126,21 @@ quick set of estimates.</p>
 <span></span>
 <span><span class="co"># fit using optimisation</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit_epifilter.html">fit_epifilter</a></span><span class="op">(</span></span>
-<span>  N<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">df_bogota</span><span class="op">)</span>,</span>
-<span>  C<span class="op">=</span><span class="va">df_bogota</span><span class="op">$</span><span class="va">cases</span>,</span>
-<span>  w<span class="op">=</span><span class="va">w</span>,</span>
-<span>  is_sampling<span class="op">=</span><span class="cn">FALSE</span>,</span>
-<span>  as_vector<span class="op">=</span><span class="cn">FALSE</span></span>
+<span>  N <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">df_bogota</span><span class="op">)</span>,</span>
+<span>  C <span class="op">=</span> <span class="va">df_bogota</span><span class="op">$</span><span class="va">cases</span>,</span>
+<span>  w <span class="op">=</span> <span class="va">w</span>,</span>
+<span>  is_sampling <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  as_vector <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># plot</span></span>
 <span><span class="va">R</span> <span class="op">&lt;-</span> <span class="va">fit</span><span class="op">$</span><span class="va">par</span><span class="op">$</span><span class="va">R</span></span>
-<span><span class="va">df_bogota</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Rt<span class="op">=</span><span class="va">R</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">date</span>, <span class="va">Rt</span>, <span class="va">cases</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">&gt;=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2020-04-01"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span><span class="op">-</span><span class="va">date</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">date</span>, y<span class="op">=</span><span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="va">df_bogota</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Rt <span class="op">=</span> <span class="va">R</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">date</span>, <span class="va">Rt</span>, <span class="va">cases</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">&gt;=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2020-04-01"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span><span class="op">-</span><span class="va">date</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">date</span>, y <span class="op">=</span> <span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_brewer.html" class="external-link">scale_color_brewer</a></span><span class="op">(</span><span class="st">"R_t"</span>, palette <span class="op">=</span> <span class="st">"Dark2"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">"R_t"</span><span class="op">)</span> <span class="op">+</span></span>
@@ -149,18 +150,18 @@ We now fit using a fully Bayesian framework which outputs
 uncertainty.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit_epifilter.html">fit_epifilter</a></span><span class="op">(</span></span>
-<span>  N<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">df_bogota</span><span class="op">)</span>,</span>
-<span>  C<span class="op">=</span><span class="va">df_bogota</span><span class="op">$</span><span class="va">cases</span>,</span>
-<span>  w<span class="op">=</span><span class="va">w</span>,</span>
-<span>  is_sampling<span class="op">=</span><span class="cn">TRUE</span>,</span>
-<span>  iter<span class="op">=</span><span class="fl">50</span>,</span>
-<span>  chains<span class="op">=</span><span class="fl">1</span> <span class="co"># as CRAN does not allow multiple cores</span></span>
+<span>  N <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">df_bogota</span><span class="op">)</span>,</span>
+<span>  C <span class="op">=</span> <span class="va">df_bogota</span><span class="op">$</span><span class="va">cases</span>,</span>
+<span>  w <span class="op">=</span> <span class="va">w</span>,</span>
+<span>  is_sampling <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  iter <span class="op">=</span> <span class="fl">50</span>,</span>
+<span>  chains <span class="op">=</span> <span class="fl">1</span> <span class="co"># as CRAN does not allow multiple cores</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; SAMPLING FOR MODEL 'epifilter' NOW (CHAIN 1).</span></span>
 <span><span class="co">#&gt; Chain 1: </span></span>
-<span><span class="co">#&gt; Chain 1: Gradient evaluation took 0.015398 seconds</span></span>
-<span><span class="co">#&gt; Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 153.98 seconds.</span></span>
+<span><span class="co">#&gt; Chain 1: Gradient evaluation took 0.014929 seconds</span></span>
+<span><span class="co">#&gt; Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 149.29 seconds.</span></span>
 <span><span class="co">#&gt; Chain 1: Adjust your expectations accordingly!</span></span>
 <span><span class="co">#&gt; Chain 1: </span></span>
 <span><span class="co">#&gt; Chain 1: </span></span>
@@ -185,9 +186,9 @@ uncertainty.</p>
 <span><span class="co">#&gt; Chain 1: Iteration: 45 / 50 [ 90%]  (Sampling)</span></span>
 <span><span class="co">#&gt; Chain 1: Iteration: 50 / 50 [100%]  (Sampling)</span></span>
 <span><span class="co">#&gt; Chain 1: </span></span>
-<span><span class="co">#&gt; Chain 1:  Elapsed Time: 16.398 seconds (Warm-up)</span></span>
-<span><span class="co">#&gt; Chain 1:                22.333 seconds (Sampling)</span></span>
-<span><span class="co">#&gt; Chain 1:                38.731 seconds (Total)</span></span>
+<span><span class="co">#&gt; Chain 1:  Elapsed Time: 15.709 seconds (Warm-up)</span></span>
+<span><span class="co">#&gt; Chain 1:                21.525 seconds (Sampling)</span></span>
+<span><span class="co">#&gt; Chain 1:                37.234 seconds (Total)</span></span>
 <span><span class="co">#&gt; Chain 1:</span></span>
 <span><span class="co">#&gt; Warning: The largest R-hat is NA, indicating chains have not mixed.</span></span>
 <span><span class="co">#&gt; Running the chains for more iterations may help. See</span></span>
@@ -206,18 +207,18 @@ uncertainty.</p>
 <span><span class="va">upper</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">R_draws</span>, <span class="fl">2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">0.975</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># plot</span></span>
-<span><span class="va">df_bogota</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span><span class="va">df_bogota</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>    lower<span class="op">=</span><span class="va">lower</span>,</span>
-<span>    middle<span class="op">=</span><span class="va">middle</span>,</span>
-<span>    upper<span class="op">=</span><span class="va">upper</span></span>
-<span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">date</span>, <span class="va">lower</span>, <span class="va">middle</span>, <span class="va">upper</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">&gt;=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2020-04-01"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">date</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>ymin<span class="op">=</span><span class="va">lower</span>, ymax<span class="op">=</span><span class="va">upper</span><span class="op">)</span>, fill<span class="op">=</span><span class="st">"blue"</span>, alpha<span class="op">=</span><span class="fl">0.6</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y<span class="op">=</span><span class="va">middle</span><span class="op">)</span>, colour<span class="op">=</span><span class="st">"blue"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">1</span>, linetype<span class="op">=</span><span class="fl">2</span>, colour<span class="op">=</span><span class="st">"orange"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    lower <span class="op">=</span> <span class="va">lower</span>,</span>
+<span>    middle <span class="op">=</span> <span class="va">middle</span>,</span>
+<span>    upper <span class="op">=</span> <span class="va">upper</span></span>
+<span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">date</span>, <span class="va">lower</span>, <span class="va">middle</span>, <span class="va">upper</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">&gt;=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2020-04-01"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">date</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>ymin <span class="op">=</span> <span class="va">lower</span>, ymax <span class="op">=</span> <span class="va">upper</span><span class="op">)</span>, fill <span class="op">=</span> <span class="st">"blue"</span>, alpha <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">middle</span><span class="op">)</span>, colour <span class="op">=</span> <span class="st">"blue"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">1</span>, linetype <span class="op">=</span> <span class="fl">2</span>, colour <span class="op">=</span> <span class="st">"orange"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">xlab</a></span><span class="op">(</span><span class="st">"Date"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">"R_t"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="fitting_real_covid19_data_files/figure-html/unnamed-chunk-4-1.png" width="700"></p>
@@ -243,28 +244,28 @@ unrelated to workplace mobility.</p>
 <p>We now fit this model using <code>epidp</code>.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
-<span>  cons<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">df_bogota</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  m<span class="op">=</span><span class="va">df_bogota</span><span class="op">$</span><span class="va">workplaces</span></span>
-<span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  cons <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">df_bogota</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  m <span class="op">=</span> <span class="va">df_bogota</span><span class="op">$</span><span class="va">workplaces</span></span>
+<span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>    m<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span></span>
-<span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>    m <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span></span>
+<span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit_epifilter_covariates.html">fit_epifilter_covariates</a></span><span class="op">(</span></span>
-<span>  N<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">df_bogota</span><span class="op">)</span>,</span>
-<span>  C<span class="op">=</span><span class="va">df_bogota</span><span class="op">$</span><span class="va">cases</span>,</span>
-<span>  w<span class="op">=</span><span class="va">w</span>,</span>
-<span>  X<span class="op">=</span><span class="va">X</span>,</span>
-<span>  is_sampling<span class="op">=</span><span class="cn">TRUE</span>,</span>
-<span>  iter<span class="op">=</span><span class="fl">50</span>, <span class="co"># probably too few iterations</span></span>
-<span>  chains<span class="op">=</span><span class="fl">1</span> <span class="co"># as CRAN does not allow multiple cores; should run with more cores</span></span>
+<span>  N <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">df_bogota</span><span class="op">)</span>,</span>
+<span>  C <span class="op">=</span> <span class="va">df_bogota</span><span class="op">$</span><span class="va">cases</span>,</span>
+<span>  w <span class="op">=</span> <span class="va">w</span>,</span>
+<span>  X <span class="op">=</span> <span class="va">X</span>,</span>
+<span>  is_sampling <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  iter <span class="op">=</span> <span class="fl">50</span>, <span class="co"># probably too few iterations</span></span>
+<span>  chains <span class="op">=</span> <span class="fl">1</span> <span class="co"># as CRAN does not allow multiple cores; should run with more cores</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; SAMPLING FOR MODEL 'epifilter_covariates' NOW (CHAIN 1).</span></span>
 <span><span class="co">#&gt; Chain 1: </span></span>
-<span><span class="co">#&gt; Chain 1: Gradient evaluation took 0.015763 seconds</span></span>
-<span><span class="co">#&gt; Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 157.63 seconds.</span></span>
+<span><span class="co">#&gt; Chain 1: Gradient evaluation took 0.01516 seconds</span></span>
+<span><span class="co">#&gt; Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 151.6 seconds.</span></span>
 <span><span class="co">#&gt; Chain 1: Adjust your expectations accordingly!</span></span>
 <span><span class="co">#&gt; Chain 1: </span></span>
 <span><span class="co">#&gt; Chain 1: </span></span>
@@ -289,9 +290,9 @@ unrelated to workplace mobility.</p>
 <span><span class="co">#&gt; Chain 1: Iteration: 45 / 50 [ 90%]  (Sampling)</span></span>
 <span><span class="co">#&gt; Chain 1: Iteration: 50 / 50 [100%]  (Sampling)</span></span>
 <span><span class="co">#&gt; Chain 1: </span></span>
-<span><span class="co">#&gt; Chain 1:  Elapsed Time: 3.006 seconds (Warm-up)</span></span>
-<span><span class="co">#&gt; Chain 1:                49.28 seconds (Sampling)</span></span>
-<span><span class="co">#&gt; Chain 1:                52.286 seconds (Total)</span></span>
+<span><span class="co">#&gt; Chain 1:  Elapsed Time: 2.92 seconds (Warm-up)</span></span>
+<span><span class="co">#&gt; Chain 1:                47.531 seconds (Sampling)</span></span>
+<span><span class="co">#&gt; Chain 1:                50.451 seconds (Total)</span></span>
 <span><span class="co">#&gt; Chain 1:</span></span>
 <span><span class="co">#&gt; Warning: There were 1 transitions after warmup that exceeded the maximum treedepth. Increase max_treedepth above 10. See</span></span>
 <span><span class="co">#&gt; https://mc-stan.org/misc/warnings.html#maximum-treedepth-exceeded</span></span>
@@ -316,7 +317,7 @@ unrelated to workplace mobility.</p>
 <span><span class="co">#&gt;          mean se_mean   sd  2.5%   25%   50%   75% 97.5% n_eff Rhat</span></span>
 <span><span class="co">#&gt; beta[2] -0.07    0.01 0.01 -0.09 -0.07 -0.07 -0.06 -0.04     6  1.4</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Samples were drawn using NUTS(diag_e) at Thu Oct  3 17:00:44 2024.</span></span>
+<span><span class="co">#&gt; Samples were drawn using NUTS(diag_e) at Fri Oct 25 14:17:24 2024.</span></span>
 <span><span class="co">#&gt; For each parameter, n_eff is a crude measure of effective sample size,</span></span>
 <span><span class="co">#&gt; and Rhat is the potential scale reduction factor on split chains (at </span></span>
 <span><span class="co">#&gt; convergence, Rhat=1).</span></span></code></pre></div>
