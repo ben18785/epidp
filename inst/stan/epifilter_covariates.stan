@@ -10,7 +10,7 @@ data {
 parameters {
   real<lower=0> sigma;
   vector[N_covariates] beta;
-  vector<lower=0>[N] epsilon;
+  vector[N] epsilon;
 }
 
 transformed parameters {

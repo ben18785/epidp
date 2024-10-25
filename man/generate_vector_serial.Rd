@@ -26,8 +26,3 @@ with shape and scale parameters derived from the specified mean and standard dev
 The discretization is performed by computing the difference in the cumulative distribution
 function (CDF) of the gamma distribution at successive integer time points.
 }
-\examples{
-\dontrun{
-generate_vector_serial(10, 5, 2)
-}
-}

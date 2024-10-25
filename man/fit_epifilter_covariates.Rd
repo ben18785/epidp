@@ -5,7 +5,7 @@
 \title{Estimate the time-varying reproduction number from incidence data using covariate
 data}
 \usage{
-fit_epifilter_covariates(N, C, w, X, ...)
+fit_epifilter_covariates(N, C, w, X, is_sampling = TRUE, ...)
 }
 \arguments{
 \item{N}{number of data points}
