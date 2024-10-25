@@ -43,6 +43,8 @@ as a Poisson random variable with a mean equal to the product of the total infec
 the time-varying reproduction number.
 }
 \examples{
-rt_fun <- function(t) { 1.5 * exp(-0.05 * t) }
+rt_fun <- function(t) {
+  1.5 * exp(-0.05 * t)
+}
 simulate_renewal_epidemic(rt_fun, 100, 5, 2, 10)
 }

@@ -17,7 +17,11 @@ fit_epifilter_covariates(N, C, w, X, is_sampling = TRUE, ...)
 \item{X}{matrix of covariates (which likely should include a first column of 1s)
 of dimensions N x (N_covariates + 1)}
 
-\item{...}{}
+\item{is_sampling}{Boolean indicating if sampling is to be used (if TRUE) or
+optimisation (if FALSE). Defaults to TRUE}
+
+\item{...}{Arguments passed to \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}} (if \code{is_sampling=TRUE}) or
+\code{\link[rstan:stanmodel-method-optimizing]{rstan::optimizing()}} (if \code{is_sampling=FALSE})}
 }
 \value{
 a stanfit object
