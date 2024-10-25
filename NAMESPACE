@@ -2,6 +2,7 @@
 
 export(fit_epifilter)
 export(fit_epifilter_covariates)
+export(generate_vector_serial)
 export(simulate_renewal_epidemic)
 import(Rcpp)
 import(methods)

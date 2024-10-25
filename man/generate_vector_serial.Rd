@@ -29,4 +29,3 @@ function (CDF) of the gamma distribution at successive integer time points.
 \examples{
 generate_vector_serial(10, 5, 2)
 }
-
