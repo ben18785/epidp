@@ -1,5 +1,3 @@
-
-
 #' Generate a Discretized Serial Interval Distribution
 #'
 #' This function generates a discretized serial interval distribution based on
@@ -19,9 +17,8 @@
 #'
 #' @examples
 #' generate_vector_serial(10, 5, 2)
-#' }
+#' @export
 generate_vector_serial <- function(nt, mean_si, sd_si) {
-
   if (!is.numeric(nt) || nt <= 0 || nt != as.integer(nt)) {
     stop("Parameter 'nt' should be a positive integer.")
   }
@@ -77,11 +74,12 @@ generate_vector_serial <- function(nt, mean_si, sd_si) {
 #' the time-varying reproduction number.
 #'
 #' @examples
-#' rt_fun <- function(t) { 1.5 * exp(-0.05 * t) }
+#' rt_fun <- function(t) {
+#'   1.5 * exp(-0.05 * t)
+#' }
 #' simulate_renewal_epidemic(rt_fun, 100, 5, 2, 10)
 #' @export
-simulate_renewal_epidemic <- function(Rt_fun, nt, mean_si, sd_si, i_0, X=NULL){
-
+simulate_renewal_epidemic <- function(Rt_fun, nt, mean_si, sd_si, i_0, X = NULL) {
   # Input validation
   if (!is.numeric(nt) || nt <= 0 || nt != as.integer(nt)) {
     stop("Parameter 'nt' should be a positive integer.")
@@ -103,27 +101,31 @@ simulate_renewal_epidemic <- function(Rt_fun, nt, mean_si, sd_si, i_0, X=NULL){
   }
 
   # Time series and Rt
-  t = 1:nt
+  t <- 1:nt
   Rt <- vector(length = nt)
-  for(i in seq_along(Rt)) {
-    if(is.null(X))
-      Rt[i] = Rt_fun(t[i])
-    else
+  for (i in seq_along(Rt)) {
+    if (is.null(X)) {
+      Rt[i] <- Rt_fun(t[i])
+    } else {
       Rt[i] <- Rt_fun(t[i], X[i, ])
+    }
   }
 
   # Total infectiousness and incidence with initial imports
-  Lt = rep(0, nt); It = Lt; It[1] = i_0; Lt[1] = It[1]
+  Lt <- rep(0, nt)
+  It <- Lt
+  It[1] <- i_0
+  Lt[1] <- It[1]
 
   w_dist <- generate_vector_serial(nt, mean_si, sd_si)
 
   # Simulate from standard renewal model
-  for(i in 2:nt){
+  for (i in 2:nt) {
     # Total infectiousness is a convolution
-    Lt[i] = sum(It[seq(i-1, 1, -1)] * w_dist[1:(i-1)])
+    Lt[i] <- sum(It[seq(i - 1, 1, -1)] * w_dist[1:(i - 1)])
     # Poisson renewal model
-    It[i] = stats::rpois(1, Lt[i] * Rt[i])
+    It[i] <- stats::rpois(1, Lt[i] * Rt[i])
   }
 
-  data.frame(t=t, i_t=It, R_t=Rt, lambda_t=Lt, w_dist=w_dist)
+  data.frame(t = t, i_t = It, R_t = Rt, lambda_t = Lt, w_dist = w_dist)
 }

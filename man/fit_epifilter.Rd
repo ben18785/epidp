@@ -16,7 +16,8 @@ fit_epifilter(N, C, w, is_sampling = TRUE, ...)
 \item{is_sampling}{Boolean indicating if sampling is to be used (if TRUE) or
 optimisation (if FALSE). Defaults to TRUE}
 
-\item{...}{}
+\item{...}{Arguments passed to \code{\link[rstan:stanmodel-method-sampling]{rstan::sampling()}} (if \code{is_sampling=TRUE}) or
+\code{\link[rstan:stanmodel-method-optimizing]{rstan::optimizing()}} (if \code{is_sampling=FALSE})}
 }
 \value{
 a stanfit object
