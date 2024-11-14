@@ -135,3 +135,95 @@ fit <- fit_epifilter_covariates(
 print(fit, "beta[2]")
 ```
 This negative association probably is a result of individuals responding to the COVID-19 pandemic conditions or governmental policy.
+
+# Determining drivers of $R_t$ for Bogota using financial time series
+```{r}
+data("bogota_financial_time_series")
+```
+
+Smooth the weekly time series
+```{r}
+daily_dates <- seq(
+  min(bogota_financial_time_series$date),
+  max(bogota_financial_time_series$date), by = "day")
+
+merchants <- unique(bogota_financial_time_series$merch_category)
+for(i in seq_along(merchants)) {
+  df_short <- bogota_financial_time_series %>% 
+    filter(merch_category==merchants[i])
+  spendamountusd_interpolated <- approx(
+    df_short$date,
+    df_short$spendamt, xout = daily_dates)$y
+  countamountusd_interpolated <- approx(df_short$date, df_short$nb_transactions, xout = daily_dates)$y
+  df_daily <- tibble(
+      date=daily_dates,
+      spendamountusd=spendamountusd_interpolated,
+      countamountusd=countamountusd_interpolated
+      ) %>% 
+    mutate(merch_type=merchants[i])
+  
+  if(i == 1)
+    big_df <- df_daily
+  else
+    big_df <- big_df %>% bind_rows(df_daily)
+}
+
+df_both <- big_df %>% 
+  left_join(covid_colombia_cases_deaths_mobility) %>% 
+  filter(city=="Bogota")
+```
+
+Here, we demonstrate how we can investigate whether the (smoothed) daily number of transactions in Bogota is associated with $R_$. We pick the "Grocery Stores/Supermarkets" category here because this is likely a particularly high contact shop.
+
+```{r}
+df_supermarkets <- df_both %>% 
+  filter(merch_type=="Grocery Stores/Supermarkets")
+
+X <- tibble(
+  cons = rep(1, nrow(df_bogota)),
+  m = df_supermarkets$countamountusd
+) %>%
+  mutate(
+    m = scale(m)[, 1]
+  ) %>%
+  as.matrix()
+
+options(mc.cores=4)
+fit <- fit_epifilter_covariates(
+  N = nrow(df_supermarkets),
+  C = df_supermarkets$cases,
+  w = w,
+  X = X,
+  is_sampling = TRUE,
+  iter = 200,
+  chains = 4 
+)
+
+print(fit, "beta[2]")
+```
+Plotting $R_t$ using these estimates.
+```{r}
+# extract posterior quantiles
+R_draws <- rstan::extract(fit, "R")[[1]]
+lower <- apply(R_draws, 2, function(x) quantile(x, 0.025))
+middle <- apply(R_draws, 2, function(x) quantile(x, 0.5))
+upper <- apply(R_draws, 2, function(x) quantile(x, 0.975))
+
+# plot
+df_supermarkets %>%
+  mutate(
+    lower = lower,
+    middle = middle,
+    upper = upper
+  ) %>%
+  select(date, lower, middle, upper) %>%
+  filter(date >= as.Date("2020-04-01")) %>%
+  ggplot(aes(x = date)) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = "blue", alpha = 0.6) +
+  geom_line(aes(y = middle), colour = "blue") +
+  geom_hline(yintercept = 1, linetype = 2, colour = "orange") +
+  xlab("Date") +
+  ylab("R_t")
+```
+
+

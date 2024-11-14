@@ -53,6 +53,6 @@ model {
 
 generated quantities {
   vector[N] log_likelihood;
-  for(t in 1:N)
+  for(t in 2:N)
     log_likelihood[t] = poisson_lpmf(C[t]|E_cases[t]);
 }
